@@ -38,9 +38,7 @@
 
 //  datasheet page 9. BL0942_REG_MODE
 
-
 //  TODO
-
 
 
 //
@@ -99,6 +97,7 @@ bool BL0942_SPI::begin()
 }
 
 
+//////////////////////////////////////////////////////
 //
 //  READ ONLY REGISTERS
 //
@@ -160,7 +159,7 @@ uint32_t BL0942_SPI::getCFPulseCount()
 {
   uint32_t raw = readRegister(BL0942_REG_CF_CNT);
   return raw;
-} 
+}
 
 float BL0942_SPI::getFrequency()
 {
@@ -178,24 +177,135 @@ uint16_t BL0942_SPI::getStatus()
 }
 
 
+//////////////////////////////////////////////////////
 //
 //  READ WRITE REGISTERS
 //
+float BL0942_SPI::getCurrentRMSOffset()
+{
+  int32_t raw = readRegister(BL0942_REG_I_RMSOS);
+  //  TODO formula units?
+  return raw;
+}
 
-//  TODO
+void BL0942_SPI::setCurrentRMSOffset(float offset)
+{
+  uint8_t raw = offset;
+  writeRegister(BL0942_REG_I_RMSOS, raw);
+}
+
+float BL0942_SPI::getPowerCreep()
+{
+  int32_t raw = readRegister(BL0942_REG_WA_CREEP);
+  //  TODO formula units?
+  return raw;
+}
+
+void BL0942_SPI::setPowerCreep(float creep)
+{
+  uint8_t raw = creep;
+  writeRegister(BL0942_REG_WA_CREEP, raw);
+}
+
+float BL0942_SPI::getFastRMSThreshold()
+{
+  uint16_t raw = readRegister(BL0942_REG_I_FAST_RMS_TH);
+  //  TODO formula units?
+  return raw;
+}
+
+void BL0942_SPI::setFastRMSThreshold(float threshold)
+{
+  uint16_t raw = threshold;
+  writeRegister(BL0942_REG_I_FAST_RMS_TH, raw);
+}
+
+uint8_t BL0942_SPI::getFastRMSCycles()
+{
+  uint8_t raw = readRegister(BL0942_REG_I_FAST_RMS_CYC);
+  return raw;
+}
+
+void BL0942_SPI::setFastRMSCycles(uint8_t cycles)
+{
+  uint8_t raw = cycles;
+  if (raw > 7) raw = 7;
+  writeRegister(BL0942_REG_I_FAST_RMS_CYC, raw);
+}
+
+uint8_t BL0942_SPI::getFrequencyCycles()
+{
+  uint8_t raw = readRegister(BL0942_REG_FREQ_CYC);
+  return raw;
+}
+
+void BL0942_SPI::setFrequencyCycles(uint8_t cycles)
+{
+  uint8_t raw = cycles;
+  if (raw > 3) raw = 3;
+  writeRegister(BL0942_REG_FREQ_CYC, raw);
+}
+
+uint8_t BL0942_SPI::getOutputConfigMask()
+{
+  uint8_t raw = readRegister(BL0942_REG_OT_FUNX);
+  return raw;
+}
+
+void BL0942_SPI::setOutputConfigMask(uint8_t mask)
+{
+  uint8_t raw = mask;
+  if (raw > 63) raw = 63;
+  writeRegister(BL0942_REG_OT_FUNX, raw);
+}
+
+uint16_t BL0942_SPI::getUserMode()
+{
+  uint16_t raw = readRegister(BL0942_REG_MODE);
+  return raw;
+}
+
+void BL0942_SPI::setUserMode(uint16_t mode)
+{
+  uint16_t raw = mode;
+  //  limit to 10 bits
+  raw &= 0x03FF;
+  writeRegister(BL0942_REG_MODE, raw);
+}
+
+uint8_t BL0942_SPI::getCurrentGain()
+{
+  uint8_t raw = readRegister(BL0942_REG_GAIN_CR);
+  return raw;
+}
+
+void BL0942_SPI::setCurrentGain(uint8_t gain)
+{
+  uint8_t raw = gain;
+  if (raw > 3) raw = 3;
+  writeRegister(BL0942_REG_GAIN_CR, raw);
+}
+
+void BL0942_SPI::softReset()
+{
+  const uint32_t SOFT_RESET = 0x5a5a5a;  //  magic number
+  writeRegister(BL0942_REG_SOFT_RESET, SOFT_RESET);
+}
+
+uint8_t BL0942_SPI::getWriteProtect()
+{
+  uint8_t raw = readRegister(BL0942_REG_USR_WRPROT);
+  return raw;
+}
+
+void BL0942_SPI::setWriteProtect()
+{
+  const uint32_t WRITE_PROTECT = 0x55;  //  magic number
+  writeRegister(BL0942_REG_USR_WRPROT, WRITE_PROTECT);
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
+//////////////////////////////////////////////////////
 //
 //  SPI
 //

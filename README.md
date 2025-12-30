@@ -39,11 +39,12 @@ Feedback as always is welcome.
 14 pin module - address pins voor UART (four devices possible
 
 table pins
-|  nr  |  name  |  10 pins  |  14 pins  |  description |
-|:----:|:------:|:---------:|:---------:|:-------------|
-| 1-14 |  TODO  |
+|  pin  |  10 pins  |  14 pins  |  description |
+|:-----:|:---------:|:---------:|:-------------|
+|  1-14 |           |           |              |
+|   2   |           |           |              |
 
-
+TODO
 
 
 
@@ -78,9 +79,23 @@ TODO
 - **BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)** software SPI.
 - **bool begin()** initializes internals.
 
+### Core
+
+TODO
 
 
+### Configuration & status
 
+TODO
+
+
+### Miscelaneous
+
+TODO
+
+- **void softReset()**
+- **uint8_t getWriteProtect()**
+- **void setWriteProtect()**
 
 
 ### SPI
@@ -112,7 +127,9 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 
 #### Should
 
+- add examples
 - improve error handling
+- investigate unit tests
 
 #### Could
 

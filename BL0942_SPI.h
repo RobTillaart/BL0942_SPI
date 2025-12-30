@@ -50,7 +50,7 @@ public:
 
   bool     begin();
 
-  //  read only registers
+  //  READ ONLY registers
   float    getIWave();
   float    getVWave();
   float    getIRMS();
@@ -61,23 +61,52 @@ public:
   float    getFrequency();
   uint16_t getStatus();
 
-  //  read write registers
 
+  //  READ WRITE registers
+  //  offset = ??
+  float    getCurrentRMSOffset();
+  void     setCurrentRMSOffset(float offset);
 
+  //  creep = ??
+  float    getPowerCreep();
+  void     setPowerCreep(float creep);
 
+  //  threshold = ??
+  float    getFastRMSThreshold();
+  void     setFastRMSThreshold(float threshold);
 
-  //  TODO more registers.
+  //  cycles = 0..7
+  uint8_t  getFastRMSCycles();
+  void     setFastRMSCycles(uint8_t cycles);
 
+  //  cycles = 0..2
+  uint8_t  getFrequencyCycles();
+  void     setFrequencyCycles(uint8_t cycles);
 
+  //  TODO elaborate per bit?
+  //  mask = 0..63
+  uint8_t  getOutputConfigMask();
+  void     setOutputConfigMask(uint8_t mask);
 
+  //  TODO elaborate per bit?
+  //  mode = 0x0000 .. 0x03FF
+  uint16_t getUserMode();
+  void     setUserMode(uint16_t mode);
 
+  //  gain = 0..3
+  uint8_t  getCurrentGain();
+  void     setCurrentGain(uint8_t gain);
 
+  void     softReset();
 
-
+  //  TODO how does this work
+  uint8_t  getWriteProtect();
+  void     setWriteProtect();
 
 
   //       SPI
-  void     setSPIspeed(uint32_t speed);  //  900 KHz max
+  //       900 KHz max
+  void     setSPIspeed(uint32_t speed);
   uint32_t getSPIspeed();
   bool     usesHWSPI();
 
