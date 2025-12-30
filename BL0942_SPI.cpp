@@ -121,27 +121,24 @@ float BL0942_SPI::getVWave()
 
 float BL0942_SPI::getIRMS()
 {
-  int32_t raw = readRegister(BL0942_REG_I_RMS);
-  //  extend sign bit
-  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  unsigned
+  uint32_t raw = readRegister(BL0942_REG_I_RMS);
   //  TODO formula units?
   return raw;
 }
 
 float BL0942_SPI::getVRMS()
 {
-  int32_t raw = readRegister(BL0942_REG_V_RMS);
-  //  extend sign bit
-  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  unsigned
+  uint32_t raw = readRegister(BL0942_REG_V_RMS);
   //  TODO formula units?
   return raw;
 }
 
 float BL0942_SPI::getIRMSFast()
 {
-  int32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
-  //  extend sign bit
-  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  unsigned
+  uint32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
   //  TODO formula units?
   return raw;
 }
@@ -157,16 +154,16 @@ float BL0942_SPI::getWatt()
 
 uint32_t BL0942_SPI::getCFPulseCount()
 {
+  //  unsigned
   uint32_t raw = readRegister(BL0942_REG_CF_CNT);
   return raw;
 }
 
 float BL0942_SPI::getFrequency()
 {
-  int32_t raw = readRegister(BL0942_REG_FREQ);
-  //  extend sign bit
-  if (raw & 0x00800000) raw |= 0xFF00000;
-  //  page 19 formula  default 20000 ~ 50 Hz.
+  //  unsigned
+  uint32_t raw = readRegister(BL0942_REG_FREQ);
+  //  page 19 formula  default 20000 == 50 Hz (?)
   return 1e6 / raw;
 }
 
@@ -288,7 +285,7 @@ void BL0942_SPI::setCurrentGain(uint8_t gain)
 
 void BL0942_SPI::softReset()
 {
-  const uint32_t SOFT_RESET = 0x5a5a5a;  //  magic number
+  const uint32_t SOFT_RESET = 0x5A5A5A;  //  magic number
   writeRegister(BL0942_REG_SOFT_RESET, SOFT_RESET);
 }
 
@@ -311,6 +308,7 @@ void BL0942_SPI::setWriteProtect()
 //
 void BL0942_SPI::setSPIspeed(uint32_t speed)
 {
+  //  datasheet page 20, section 3.1
   //  900 KHz max datasheet
   _SPIspeed = speed;
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
