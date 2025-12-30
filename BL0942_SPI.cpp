@@ -1,0 +1,355 @@
+//
+//    FILE: BL0942_SPI.cpp
+//  AUTHOR: Rob Tillaart
+//    DATE: 2025-12-29
+// VERSION: 0.1.0
+// PURPOSE: Arduino library for BL0942 energy monitor, SPI interface.
+//     URL: https://github.com/RobTillaart/BL0942_SPI
+
+
+#include "BL0942_SPI.h"
+
+//  REGISTERS
+//  datasheet page 8.
+//
+//      NAME                                NUMBER       BITS    RW
+//-------------------------------------------------------------------
+#define BL0942_REG_I_WAVE                   0x01      //  20     RO
+#define BL0942_REG_V_WAVE                   0x02      //  20     RO
+#define BL0942_REG_I_RMS                    0x03      //  24     RO
+#define BL0942_REG_V_RMS                    0x04      //  24     RO
+#define BL0942_REG_I_FAST_RMS               0x05      //  24     RO
+#define BL0942_REG_WATT                     0x06      //  24     RO
+#define BL0942_REG_CF_CNT                   0x07      //  24     RO
+#define BL0942_REG_FREQ                     0x08      //  16     RO
+#define BL0942_REG_STATUS                   0x09      //  10     RO
+
+#define BL0942_REG_I_RMSOS                  0x12      //   8     RW
+#define BL0942_REG_WA_CREEP                 0x14      //   8     RW
+#define BL0942_REG_I_FAST_RMS_TH            0x15      //  16     RW
+#define BL0942_REG_I_FAST_RMS_CYC           0x16      //   3     RW
+#define BL0942_REG_FREQ_CYC                 0x17      //   2     RW
+#define BL0942_REG_OT_FUNX                  0x18      //   6     RW
+#define BL0942_REG_MODE                     0x19      //  10     RW
+#define BL0942_REG_GAIN_CR                  0x1A      //   2     RW
+#define BL0942_REG_SOFT_RESET               0x1C      //  24     RW
+#define BL0942_REG_USR_WRPROT               0x1D      //   8     RW
+
+
+//  datasheet page 9. BL0942_REG_MODE
+
+
+//  TODO
+
+
+
+//
+//  HARDWARE SPI
+//
+BL0942_SPI::BL0942_SPI(uint8_t select, __SPI_CLASS__ * mySPI)
+{
+  _select   = select;
+  _dataIn   = 255;
+  _dataOut  = 255;
+  _clock    = 255;
+  _hwSPI    = true;
+  _mySPI    = mySPI;
+}
+
+//
+//  SOFTWARE SPI
+//
+BL0942_SPI::BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)
+{
+  _select   = select;
+  _dataIn   = dataIn;
+  _dataOut  = dataOut;
+  _clock    = clock;
+  _hwSPI    = false;
+  _mySPI    = NULL;
+}
+
+
+bool BL0942_SPI::begin()
+{
+  pinMode(_select, OUTPUT);
+  digitalWrite(_select, HIGH);  //  TODO CHECK
+
+  //  TODO check mode
+  _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
+
+  if(_hwSPI)
+  {
+    //  _mySPI->end();
+    //  _mySPI->begin();
+    //  delay(1);
+  }
+  else
+  {
+    pinMode(_dataIn, INPUT);
+    pinMode(_dataOut, OUTPUT);
+    pinMode(_clock,   OUTPUT);
+    digitalWrite(_dataOut, LOW);
+    digitalWrite(_clock,   LOW);
+  }
+
+  //  reset variables
+  _error = 0;
+  return true;
+}
+
+
+//
+//  READ ONLY REGISTERS
+//
+float BL0942_SPI::getIWave()
+{
+  int32_t raw = readRegister(BL0942_REG_I_WAVE);
+  //  extend sign bit
+  if (raw & 0x00040000) raw |= 0xFFF0000;
+  //  TODO formula units?
+  return raw;
+}
+
+float BL0942_SPI::getVWave()
+{
+  int32_t raw = readRegister(BL0942_REG_V_WAVE);
+  //  extend sign bit
+  if (raw & 0x00040000) raw |= 0xFFF0000;
+  //  TODO formula units?
+  return raw;
+}
+
+float BL0942_SPI::getIRMS()
+{
+  int32_t raw = readRegister(BL0942_REG_I_RMS);
+  //  extend sign bit
+  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  TODO formula units?
+  return raw;
+}
+
+float BL0942_SPI::getVRMS()
+{
+  int32_t raw = readRegister(BL0942_REG_V_RMS);
+  //  extend sign bit
+  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  TODO formula units?
+  return raw;
+}
+
+float BL0942_SPI::getIRMSFast()
+{
+  int32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
+  //  extend sign bit
+  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  TODO formula units?
+  return raw;
+}
+
+float BL0942_SPI::getWatt()
+{
+  int32_t raw = readRegister(BL0942_REG_WATT);
+  //  extend sign bit
+  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  TODO formula units?
+  return raw;
+}
+
+uint32_t BL0942_SPI::getCFPulseCount()
+{
+  uint32_t raw = readRegister(BL0942_REG_CF_CNT);
+  return raw;
+} 
+
+float BL0942_SPI::getFrequency()
+{
+  int32_t raw = readRegister(BL0942_REG_FREQ);
+  //  extend sign bit
+  if (raw & 0x00800000) raw |= 0xFF00000;
+  //  page 19 formula  default 20000 ~ 50 Hz.
+  return 1e6 / raw;
+}
+
+uint16_t BL0942_SPI::getStatus()
+{
+  uint32_t raw = readRegister(BL0942_REG_STATUS);
+  return raw & 0x03FF;  //  only 10 bits
+}
+
+
+//
+//  READ WRITE REGISTERS
+//
+
+//  TODO
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//  SPI
+//
+void BL0942_SPI::setSPIspeed(uint32_t speed)
+{
+  //  900 KHz max datasheet
+  _SPIspeed = speed;
+  _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
+}
+
+uint32_t BL0942_SPI::getSPIspeed()
+{
+  return _SPIspeed;
+}
+
+bool BL0942_SPI::usesHWSPI()
+{
+  return _hwSPI;
+}
+
+
+//
+//  ERROR
+//
+int BL0942_SPI::getLastError()
+{
+  int e = _error;
+  _error = 0;
+  return e;
+}
+
+
+//////////////////////////////////////////////////////
+//
+//  PROTECTED
+//
+int BL0942_SPI::writeRegister(uint8_t regAddr, uint32_t value)
+{
+  uint8_t checkSum = 0;
+  uint8_t bytes = 3;
+
+  _error = BL0942_OK;
+  if (_hwSPI)  //  Hardware SPI
+  {
+    _mySPI->beginTransaction(_spi_settings);
+    digitalWrite(_select, LOW);
+    _mySPI->transfer(0xA8);       //  WRITE_COMMAND
+    _mySPI->transfer(regAddr);
+    checkSum = 0xA8 + regAddr;
+    while (bytes--)
+    {
+      uint8_t val = value >> (bytes * 8);
+      _mySPI->transfer(val);
+      checkSum += val;
+    }
+    //  INVERT CHECKSUM
+    checkSum ^= 0xFF;
+    _mySPI->transfer(checkSum);
+    digitalWrite(_select, HIGH);
+    _mySPI->endTransaction();
+  }
+  else         //  Software SPI
+  {
+    digitalWrite(_select, LOW);
+    swSPI_transfer(0xA8);       //  WRITE_COMMAND
+    swSPI_transfer(regAddr);
+    checkSum = 0xA8 + regAddr;
+    while (bytes--)
+    {
+      uint8_t val = value >> (bytes * 8);
+      swSPI_transfer(val);
+      checkSum += val;
+    }
+    //  INVERT CHECKSUM
+    checkSum ^= 0xFF;
+    swSPI_transfer(checkSum);
+    digitalWrite(_select, HIGH);
+  }
+  return _error;
+}
+
+
+uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
+{
+  uint32_t value = 0;
+  uint8_t  checkSum = 0;
+  uint8_t  bytes = 3;
+
+  _error = BL0942_OK;
+  if (_hwSPI)  //  Hardware SPI
+  {
+    _mySPI->beginTransaction(_spi_settings);
+    digitalWrite(_select, LOW);
+    _mySPI->transfer(0x58);       //  READ_COMMAND
+    _mySPI->transfer(regAddr);
+
+    while (bytes--)
+    {
+      value += _mySPI->transfer(0x00);
+      checkSum += value;
+      value <<= 8;
+    }
+    uint8_t crc = _mySPI->transfer(0x00);
+    if (crc != checkSum)
+    {
+      _error = BL0492_ERR_CHECKSUM;
+    }
+    digitalWrite(_select, HIGH);
+    _mySPI->endTransaction();
+  }
+  else      //  Software SPI
+  {
+    digitalWrite(_select, LOW);
+    swSPI_transfer(0x58);       //  READ_COMMAND
+    swSPI_transfer(regAddr);
+
+    while (bytes--)
+    {
+      value += swSPI_transfer(0x00);
+      checkSum += value;
+      value <<= 8;
+    }
+    uint8_t crc = swSPI_transfer(0x00);
+    if (crc != checkSum)
+    {
+      _error = BL0492_ERR_CHECKSUM;
+    }
+    digitalWrite(_select, HIGH);
+  }
+  //  debugging
+  //  Serial.println(value, HEX);
+  return value;
+}
+
+
+uint8_t BL0942_SPI::swSPI_transfer(uint8_t val)
+{
+  uint8_t clk = _clock;
+  uint8_t dao = _dataOut;
+  uint8_t dai = _dataIn;
+  uint8_t value = 0;
+  for (uint8_t mask = 0x80; mask; mask >>= 1)
+  {
+    digitalWrite(dao,(val & mask));
+    digitalWrite(clk, HIGH);
+    digitalWrite(clk, LOW);
+    if (digitalRead(dai) == HIGH)
+    {
+      value |= mask;
+    }
+  }
+  return value;
+}
+
+
+//  -- END OF FILE --
+

@@ -1,0 +1,15 @@
+# Syntax Colouring Map For BL0942_SPI
+
+# Data types (KEYWORD1)
+BL0942_SPI	KEYWORD1
+
+
+# Methods and Functions (KEYWORD2)
+begin	KEYWORD2
+
+
+
+
+# Constants (LITERAL1)
+BL0942_SPI_LIB_VERSION	LITERAL1
+
