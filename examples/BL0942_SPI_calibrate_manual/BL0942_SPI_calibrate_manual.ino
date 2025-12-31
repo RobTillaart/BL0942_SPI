@@ -80,7 +80,7 @@ void loop()
           break;
       case 'e' : 
           mySensor.setEnergyLSB(mySensor.getEnergyLSB() / delta);
-          Serial.println(mySensor.Energy());          
+          Serial.println(mySensor.getEnergy());          
           break;
     }
 
