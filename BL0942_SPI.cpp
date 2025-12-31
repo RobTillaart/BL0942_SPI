@@ -41,6 +41,17 @@
 //  TODO
 
 
+
+
+//
+//  CALIBRATION MAGIC NUMBERS
+//  extracted from app note (Chinese)
+//
+const float BL0942_VREF = 1.218;
+const float BL0942_MAGIC_CURRENT = 305978;
+const float BL0942_MAGIC_VOLT    = 73989E+3;
+const float BL0942_MAGIC_WATT    = 3537E+6;
+
 //
 //  HARDWARE SPI
 //
@@ -101,44 +112,58 @@ bool BL0942_SPI::begin()
 //
 //  CALIBRATION
 //
-float BL0942_SPI::getVoltageFactor()
+void BL0942_SPI::calibrate(float shunt, float reductionFactor)
 {
-  return _voltageFactor;
+  //  based upon APPNOTE (Chinese) page 4
+  _currentLSB = BL0942_VREF / (BL0942_MAGIC_CURRENT * shunt);
+
+  _voltageLSB = BL0942_VREF * reductionFactor / BL0942_MAGIC_VOLT;
+
+  _powerLSB   = BL0942_VREF * BL0942_VREF * reductionFactor;
+  _powerLSB  /= BL0942_MAGIC_WATT;
+
+  _energyLSB  = 1638.4 * 256 * _powerLSB / 3600000;
 }
 
-void BL0942_SPI::setVoltageFactor(float voltageFactor)
+
+float BL0942_SPI::getVoltageLSB()
 {
-  _voltageFactor = voltageFactor;
+  return _voltageLSB;
 }
 
-float BL0942_SPI::getCurrentFactor()
+void BL0942_SPI::setVoltageLSB(float voltageLSB)
 {
-  return _currentFactor;
+  _voltageLSB = voltageLSB;
 }
 
-void BL0942_SPI::setCurrentFactor(float currentFactor)
+float BL0942_SPI::getCurrentLSB()
 {
-  _currentFactor = currentFactor;
+  return _currentLSB;
 }
 
-float BL0942_SPI::getPowerFactor()
+void BL0942_SPI::setCurrentLSB(float currentLSB)
 {
-  return _powerFactor;
+  _currentLSB = currentLSB;
 }
 
-void BL0942_SPI::setPowerFactor(float powerFactor)
+float BL0942_SPI::getPowerLSB()
 {
-  _powerFactor = powerFactor;
+  return _powerLSB;
 }
 
-float BL0942_SPI::getEnergyFactor()
+void BL0942_SPI::setPowerLSB(float powerLSB)
 {
-  return _energyFactor;
+  _powerLSB = powerLSB;
 }
 
-void BL0942_SPI::setEnergyFactor(float energyFactor)
+float BL0942_SPI::getEnergyLSB()
 {
-  _energyFactor  = energyFactor;
+  return _energyLSB;
+}
+
+void BL0942_SPI::setEnergyLSB(float energyLSB)
+{
+  _energyLSB = energyLSB;
 }
 
 
@@ -152,7 +177,7 @@ float BL0942_SPI::getIWave()
   //  extend sign bit
   if (raw & 0x00040000) raw |= 0xFFF0000;
   //  TODO formula units?
-  return raw * _currentFactor;
+  return raw * _currentLSB;
 }
 
 float BL0942_SPI::getVWave()
@@ -160,32 +185,30 @@ float BL0942_SPI::getVWave()
   int32_t raw = readRegister(BL0942_REG_V_WAVE);
   //  extend sign bit
   if (raw & 0x00040000) raw |= 0xFFF0000;
-  //  TODO formula units?
-  return raw * _voltageFactor;
+  return raw * _voltageLSB;
 }
 
 float BL0942_SPI::getIRMS()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_I_RMS);
-  //  TODO formula units?
-  return raw * _currentFactor;
+  return raw * _currentLSB;
 }
 
 float BL0942_SPI::getVRMS()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_V_RMS);
-  //  TODO formula units?
-  return raw * _voltageFactor;
+  //  RMS factor?
+  return raw * _voltageLSB;
 }
 
 float BL0942_SPI::getIRMSFast()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
-  //  TODO formula units?
-  return raw *_currentFactor;
+  //  RMS factor?
+  return raw *_currentLSB;
 }
 
 float BL0942_SPI::getWatt()
@@ -193,8 +216,7 @@ float BL0942_SPI::getWatt()
   int32_t raw = readRegister(BL0942_REG_WATT);
   //  extend sign bit
   if (raw & 0x00800000) raw |= 0xFF00000;
-  //  TODO formula units?
-  return raw * _powerFactor;
+  return raw * _powerLSB;
 }
 
 uint32_t BL0942_SPI::getCFPulseCount()
@@ -202,6 +224,13 @@ uint32_t BL0942_SPI::getCFPulseCount()
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_CF_CNT);
   return raw;
+}
+
+float BL0942_SPI::getEnergy()
+{
+  //  unsigned
+  uint32_t raw = readRegister(BL0942_REG_CF_CNT);
+  return raw * _energyLSB;
 }
 
 float BL0942_SPI::getFrequency()
@@ -454,7 +483,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     uint8_t crc = _mySPI->transfer(0x00);
     if (crc != checkSum)
     {
-      _error = BL0492_ERR_CHECKSUM;
+      _error = BL0942_ERR_CHECKSUM;
     }
     digitalWrite(_select, HIGH);
     _mySPI->endTransaction();
@@ -474,7 +503,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     uint8_t crc = swSPI_transfer(0x00);
     if (crc != checkSum)
     {
-      _error = BL0492_ERR_CHECKSUM;
+      _error = BL0942_ERR_CHECKSUM;
     }
     digitalWrite(_select, HIGH);
   }

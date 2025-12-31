@@ -18,20 +18,16 @@ Arduino library for BL0942 energy monitor, SPI interface.
 
 **Experimental**
 
-This library is to use the BL0942 energy monitors.
-This is a configurable current and voltage sensor.
+This library is to use the BL0942 energy monitor.
+The BL0942 is a configurable current and voltage sensor.
 This library only implements and supports the SPI interface.
-Therfor the SEL (select) pin must be connected to HIGH (3.3V).
+Therfor the SEL (protocol select) pin must be connected to HIGH (3.3V).
 
-The device is a SPI slave only, which works in half duplex mode only,
-at a maximum clock rate of 900 KHz.
+The device is a SPI slave, which works in half duplex mode,
+at a maximum clock rate of 900 kHz.
 It is not tested if it works well beyond that speed.
 
-
-
-
-
-The library is not tested with hardware yet.
+The library is not tested with hardware yet, so use with care.
 
 Feedback as always is welcome.
 
@@ -82,12 +78,20 @@ _Do not apply this product to safety protection devices or emergency stop equipm
 and any other applications that may cause personal injury due to the product's failure._
 
 
+### BL0940
+
+Not compatible (possible partial but needs other magic numbers)
+
+
 ### Related
 
-TODO
-
+- https://www.belling.com.cn/product_info.html?id=753  latest datasheet
 - https://github.com/RobTillaart/printHelpers exponential notation floats
 - https://github.com/SanteriLindfors/BL0942  UART library.
+
+
+Application notes
+- https://www.belling.com.cn/media/file_object/bel_product/BL0942/guide/BL0942%20APP%20Note_V1.04_cn.pdf
 
 
 ### Tested
@@ -108,10 +112,39 @@ TODO
 - **bool begin()** initializes internals.
 
 
-### Calibration
+### Calibration 1
+
+- **void calibrate(float shunt, float reductionFactor = 1.0f)**
+calibration of the current measurement based upon the shunt and the 
+calibration of the voltage based upon the reduction factor (ration) 
+of an optional voltage divider.
+
+Typical values for shunt are in the range 0.001 - 1 Ohm.
+
+Reduction factor of an ```VDD - R1 - R2 - GND``` ladder:
+```
+RF = (R1 + R2) / R2;  // e.g. R1=20K R2=100 => RF=20100/100=201.
+```
+
+Note the max current is 30A although one should keep the current under 15A. The power dissipated by the shunt can be calculated:
+```
+P = 25 * 35 * shunt;
+```
+
+### Calibration 2
 
 
+The following functions set the values per bit directly for the core measurements registers. The LSB's are in micros.
+The getter functions allow (run time) adjustments or help to manually calibrate the device.
 
+- **float getVoltageLSB()**
+- **void setVoltageLSB(float voltageLSB)**
+- **float getCurrentLSB()**
+- **void setCurrentLSB(float currentLSB)**
+- **float getPowerLSB()**
+- **void setPowerLSB(float powerLSB)**
+- **float getEnergyLSB()**
+- **void setEnergyLSB(float energyLSB)**
 
 
 ### Core

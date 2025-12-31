@@ -37,65 +37,65 @@
 //  ERROR CONSTANTS
 //
 const int BL0942_OK = 0;
-const int BL0492_ERR_WRITE = -1;
-const int BL0492_ERR_READ = -2;
-const int BL0492_ERR_CHECKSUM = -3;
+const int BL0942_ERR_WRITE = -1;
+const int BL0942_ERR_READ = -2;
+const int BL0942_ERR_CHECKSUM = -3;
 
 
 //
 //  MODE REGISTER (0x19) BIT MASKS
 //  read datasheet page 9 for details
 //
-const int BL0492_MODE_CF_ENABLE  = 0x004;
-const int BL0492_MODE_RMS_UPDATE = 0x008;  //  0 = 400ms, 1 = 800 ms;
-const int BL0492_MODE_RMS_FAST   = 0x010;  //  0 = full wave, 1 = AC Wave
-const int BL0492_MODE_AC_FREQ    = 0x020;  //  0 = 50 Hz, 1 = 60 Hz
-const int BL0492_MODE_CF_CNT_CLR = 0x040;
-const int BL0492_MODE_CF_CNT_ADD = 0x080;
-const int BL0492_MODE_UART_4800  = 0x000;
-const int BL0492_MODE_UART_9600  = 0x100;
-const int BL0492_MODE_UART_19200 = 0x200;
-const int BL0492_MODE_UART_38400 = 0x300;
+const int BL0942_MODE_CF_ENABLE  = 0x004;
+const int BL0942_MODE_RMS_UPDATE = 0x008;  //  0 = 400ms, 1 = 800 ms;
+const int BL0942_MODE_RMS_FAST   = 0x010;  //  0 = full wave, 1 = AC Wave
+const int BL0942_MODE_AC_FREQ    = 0x020;  //  0 = 50 Hz, 1 = 60 Hz
+const int BL0942_MODE_CF_CNT_CLR = 0x040;
+const int BL0942_MODE_CF_CNT_ADD = 0x080;
+const int BL0942_MODE_UART_4800  = 0x000;
+const int BL0942_MODE_UART_9600  = 0x100;
+const int BL0942_MODE_UART_19200 = 0x200;
+const int BL0942_MODE_UART_38400 = 0x300;
 
 
 //
 //  OUTPUT CONFIG REGISTER (0x18) BIT MASKS
 //  read datasheet page 9 for details
 //
-const int BL0492_CF1_ACTIVE_ENERGY = 0x00;  //  default
-const int BL0492_CF1_OVER_CURRENT  = 0x01;
-const int BL0492_CF1_ZERO_CROSS_V  = 0x02;
-const int BL0492_CF1_ZERO_CROSS_I  = 0x03;
+const int BL0942_CF1_ACTIVE_ENERGY = 0x00;  //  default
+const int BL0942_CF1_OVER_CURRENT  = 0x01;
+const int BL0942_CF1_ZERO_CROSS_V  = 0x02;
+const int BL0942_CF1_ZERO_CROSS_I  = 0x03;
 
-const int BL0492_CF2_ACTIVE_ENERGY = 0x00;
-const int BL0492_CF2_OVER_CURRENT  = 0x04;  //  default
-const int BL0492_CF2_ZERO_CROSS_V  = 0x08;
-const int BL0492_CF2_ZERO_CROSS_I  = 0x0C;
+const int BL0942_CF2_ACTIVE_ENERGY = 0x00;
+const int BL0942_CF2_OVER_CURRENT  = 0x04;  //  default
+const int BL0942_CF2_ZERO_CROSS_V  = 0x08;
+const int BL0942_CF2_ZERO_CROSS_I  = 0x0C;
 
-const int BL0492_ZX_ACTIVE_ENERGY  = 0x00;
-const int BL0492_ZX_OVER_CURRENT   = 0x10;
-const int BL0492_ZX_ZERO_CROSS_V   = 0x20;  //  default
-const int BL0492_ZX_ZERO_CROSS_I   = 0x30;
+const int BL0942_ZX_ACTIVE_ENERGY  = 0x00;
+const int BL0942_ZX_OVER_CURRENT   = 0x10;
+const int BL0942_ZX_ZERO_CROSS_V   = 0x20;  //  default
+const int BL0942_ZX_ZERO_CROSS_I   = 0x30;
 
 
 //
 //  STATUS REGISTER (0x09) BIT MASKS
 //  read datasheet page 10 for details
 //
-const int BL0492_STAT_CF_REVP  = 0x0001;
-const int BL0492_STAT_CREEP    = 0x0002;
-const int BL0492_STAT_I_ZX_LTH = 0x0100;
-const int BL0492_STAT_V_ZX_LTH = 0x0200;
+const int BL0942_STAT_CF_REVP  = 0x0001;
+const int BL0942_STAT_CREEP    = 0x0002;
+const int BL0942_STAT_I_ZX_LTH = 0x0100;
+const int BL0942_STAT_V_ZX_LTH = 0x0200;
 
 
 //
 //  GAIN REGISTER (0x1A) BIT MASKS
 //  read datasheet page 10 for details
 //
-const int BL0492_GAIN_1  = 0x00;
-const int BL0492_GAIN_4  = 0x01;
-const int BL0492_GAIN_16 = 0x02;  //  default
-const int BL0492_GAIN_24 = 0x03;
+const int BL0942_GAIN_1  = 0x00;
+const int BL0942_GAIN_4  = 0x01;
+const int BL0942_GAIN_16 = 0x02;  //  default
+const int BL0942_GAIN_24 = 0x03;
 
 
 
@@ -111,14 +111,16 @@ public:
   bool     begin();
 
   //  CALIBRATION
-  float    getVoltageFactor();
-  void     setVoltageFactor(float voltageFactor);
-  float    getCurrentFactor();
-  void     setCurrentFactor(float currentFactor);
-  float    getPowerFactor();
-  void     setPowerFactor(float powerFactor);
-  float    getEnergyFactor();
-  void     setEnergyFactor(float energyFactor);
+  void     calibrate(float shunt, float reductionFactor = 1.0f);
+  //  direct calibration of the least significant bits per measurement.
+  float    getVoltageLSB();
+  void     setVoltageLSB(float voltageLSB);
+  float    getCurrentLSB();
+  void     setCurrentLSB(float currentLSB);
+  float    getPowerLSB();
+  void     setPowerLSB(float powerLSB);
+  float    getEnergyLSB();
+  void     setEnergyLSB(float energyLSB);
 
   //  READ ONLY registers
   float    getIWave();
@@ -128,6 +130,7 @@ public:
   float    getIRMSFast();
   float    getWatt();
   uint32_t getCFPulseCount();
+  float    getEnergy();       //  kWh
   float    getFrequency();
 
   //  status bit masks see above
@@ -207,10 +210,10 @@ protected:
   float    _internVolts  = 1.218;
   float    _dividerRatio = 1.0;
   //  how to determine magic numbers
-  float    _powerFactor   = 1.0;
-  float    _voltageFactor = 1.0;
-  float    _currentFactor = 1.0;
-  float    _energyFactor  = 1.0;
+  float    _powerLSB   = 1.0;
+  float    _voltageLSB = 1.0;
+  float    _currentLSB = 1.0;
+  float    _energyLSB  = 1.0;
 
 
   bool     _hwSPI;

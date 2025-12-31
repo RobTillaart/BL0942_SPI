@@ -24,6 +24,8 @@ void setup()
 
   mySensor.begin();
 
+  mySensor.calibrate(0.001, 1);  //  shunt in ohm, reduction factor voltage.
+
   Serial.println("get all registers");
   Serial.println("READ ONLY\n");
 
