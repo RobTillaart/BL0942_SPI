@@ -47,10 +47,11 @@
 //  CALIBRATION MAGIC NUMBERS
 //  extracted from app note (Chinese)
 //
-const float BL0942_VREF = 1.218;
-const float BL0942_MAGIC_CURRENT = 305978;
-const float BL0942_MAGIC_VOLT    = 73989E+3;
-const float BL0942_MAGIC_WATT    = 3537E+6;
+const float BL0942_VREF          = 1.218;
+const float BL0942_MAGIC_CURRENT = 305978000;
+const float BL0942_MAGIC_VOLT    = 73989000;
+const float BL0942_MAGIC_POWER   = 3537000000;
+
 
 //
 //  HARDWARE SPI
@@ -84,7 +85,6 @@ bool BL0942_SPI::begin()
   pinMode(_select, OUTPUT);
   digitalWrite(_select, HIGH);  //  TODO CHECK
 
-  //  TODO check mode
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 
   if(_hwSPI)
@@ -103,7 +103,7 @@ bool BL0942_SPI::begin()
   }
 
   //  reset variables
-  _error = 0;
+  _error = BL0942_OK;
   return true;
 }
 
@@ -115,12 +115,12 @@ bool BL0942_SPI::begin()
 void BL0942_SPI::calibrate(float shunt, float reductionFactor)
 {
   //  based upon APPNOTE (Chinese) page 4
-  _currentLSB = BL0942_VREF / (BL0942_MAGIC_CURRENT * shunt);
-
   _voltageLSB = BL0942_VREF * reductionFactor / BL0942_MAGIC_VOLT;
 
+  _currentLSB = BL0942_VREF / (BL0942_MAGIC_CURRENT * shunt);
+
   _powerLSB   = BL0942_VREF * BL0942_VREF * reductionFactor;
-  _powerLSB  /= BL0942_MAGIC_WATT;
+  _powerLSB  /= (BL0942_MAGIC_POWER * shunt);
 
   _energyLSB  = 1638.4 * 256 * _powerLSB / 3600000;
 }
@@ -405,7 +405,7 @@ bool BL0942_SPI::usesHWSPI()
 int BL0942_SPI::getLastError()
 {
   int e = _error;
-  _error = 0;
+  _error = BL0942_OK;
   return e;
 }
 

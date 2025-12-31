@@ -44,7 +44,7 @@ const int BL0942_ERR_CHECKSUM = -3;
 
 //
 //  MODE REGISTER (0x19) BIT MASKS
-//  read datasheet page 9 for details
+//  read datasheet page 10 for details
 //
 const int BL0942_MODE_CF_ENABLE  = 0x004;
 const int BL0942_MODE_RMS_UPDATE = 0x008;  //  0 = 400ms, 1 = 800 ms;
@@ -60,7 +60,7 @@ const int BL0942_MODE_UART_38400 = 0x300;
 
 //
 //  OUTPUT CONFIG REGISTER (0x18) BIT MASKS
-//  read datasheet page 9 for details
+//  read datasheet page 11 for details
 //
 const int BL0942_CF1_ACTIVE_ENERGY = 0x00;  //  default
 const int BL0942_CF1_OVER_CURRENT  = 0x01;
@@ -80,7 +80,7 @@ const int BL0942_ZX_ZERO_CROSS_I   = 0x30;
 
 //
 //  STATUS REGISTER (0x09) BIT MASKS
-//  read datasheet page 10 for details
+//  read datasheet page 11 for details
 //
 const int BL0942_STAT_CF_REVP  = 0x0001;
 const int BL0942_STAT_CREEP    = 0x0002;
@@ -90,7 +90,7 @@ const int BL0942_STAT_V_ZX_LTH = 0x0200;
 
 //
 //  GAIN REGISTER (0x1A) BIT MASKS
-//  read datasheet page 10 for details
+//  read datasheet page 11 for details
 //
 const int BL0942_GAIN_1  = 0x00;
 const int BL0942_GAIN_4  = 0x01;
@@ -158,7 +158,6 @@ public:
   uint8_t  getFrequencyCycles();
   void     setFrequencyCycles(uint8_t cycles);
 
-
   //  bit masks see above
   //  mask = 0..63
   uint8_t  getOutputConfigMask();
@@ -175,13 +174,10 @@ public:
   void     setCurrentGain(uint8_t gain);
 
   void     softReset();
-
-  //  TODO investigate how does this works
   uint8_t  getWriteProtect();
   void     setWriteProtect(bool wp);
 
 
-  //
   //       SPI
   //       900 KHz max
   void     setSPIspeed(uint32_t speed);

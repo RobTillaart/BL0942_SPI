@@ -18,6 +18,8 @@ Arduino library for BL0942 energy monitor, SPI interface.
 
 **Experimental - Work in progress**
 
+Note: this is work in progress, not functional complete yet.
+
 This library is to use the BL0942 energy monitor.
 The BL0942 is a configurable current and voltage sensor.
 This library only implements and supports the SPI interface.
@@ -60,15 +62,18 @@ There are two different BL0942 modules, one with 10 pins, and one with
 
 Note: use pull ups on the serial data / clock lines.
 
-Note from page 20, section 3.1
-- three or four wire communication method. In three wire mode, A2_NCS is connected to GND. In four-wire mode, the A2_NCS must be driven low for the entire read or write operation.
+
+_Note from page 20, section 3.1
+- three or four wire communication method. In three wire mode, A2_NCS is connected to GND. In four-wire mode, the A2_NCS must be driven low for the entire read or write operation._ 
+
+TODO Could this work as a SELECT pin for multiple devices?.
 
 
 ### Calibration
 
-TODO HOW TO
+TODO describe how to 
 
-Sketch neeeded
+Example sketches neeeded
 
 
 ### Warning
@@ -79,7 +84,7 @@ and any other applications that may cause personal injury due to the product's f
 
 ### BL0940
 
-Not compatible (possible partial but needs other magic numbers)
+Not compatible (possible partial, needs other magic numbers)
 
 
 ### Related
@@ -95,7 +100,7 @@ Application notes
 
 ### Tested
 
-TODO
+not
 
 
 ## Interface
@@ -125,16 +130,17 @@ Reduction factor of an ```VDD - R1 - R2 - GND``` ladder:
 RF = (R1 + R2) / R2;  // e.g. R1=20K R2=100 => RF=20100/100=201.
 ```
 
-Note the max current is 30A although one should keep the current under 15A. The power dissipated by the shunt can be calculated:
+Note the max current is 30A although one should keep the current under 15A. 
+The power dissipated by the shunt can be calculated:
 ```
 P = 25 * 35 * shunt;
 ```
 
 ### Calibration 2
 
-
-The following functions set the values per bit directly for the core measurements registers. The LSB's are in micros.
-The getter functions allow (run time) adjustments or help to manually calibrate the device.
+The following functions set the values per LSB directly for the core measurements registers. 
+The getter functions allow (run time) adjustments and help to manually calibrate
+the device more precise.
 
 - **float getVoltageLSB()**
 - **void setVoltageLSB(float voltageLSB)**
@@ -148,43 +154,83 @@ The getter functions allow (run time) adjustments or help to manually calibrate 
 
 ### Core
 
-TODO elaborate, units + range
+- **float getIWave()** return current in Amperes.
+- **float getVWave()** return voltage in Volts.
+- **float getIRMS()** return RMS current in Amperes.
+- **float getVRMS()** return RMS voltage in Volts.
+- **float getIRMSFast()** returns RMS current (faster less exact) in Amperes.
+- **float getWatt()** returns power Watt
+- **uint32_t getCFPulseCount()** returns counter (base for energy)
+- **float getEnergy()** returns energy in kWh.
+- **float getFrequency()** returns frequency ~ 50 or 60 Hz.
+- **uint16_t getStatus()** returns status byte mask.
 
-- **float getIWave()**
-- **float getVWave()**
-- **float getIRMS()**
-- **float getVRMS()**
-- **float getIRMSFast()**
-- **float getWatt()**
-- **uint32_t getCFPulseCount()**
-- **float getFrequency()**
-- **uint16_t getStatus()**
-
-TODO status bits table
+|  name                  |  value   |
+|:-----------------------|:--------:|
+|  BL0942_STAT_CF_REVP   |  0x0001  |
+|  BL0942_STAT_CREEP     |  0x0002  |
+|  BL0942_STAT_I_ZX_LTH  |  0x0100  |
+|  BL0942_STAT_V_ZX_LTH  |  0x0200  |
 
 
 ### Configuration
 
-TODO elaborate, split in more sections?
+Read datasheet for details.
+
+TODO
+- not tested
+- find their meaning / how these workor affect measurements. 
+- elaborate API + code details 
+
+#### RMS offset
 
 - **float getCurrentRMSOffset()**
 - **void setCurrentRMSOffset(float offset)**
+
+#### Power creep
+
 - **float getPowerCreep()**
 - **void setPowerCreep(float creep)**
+
+#### Other
+
 - **float getFastRMSThreshold()**
 - **void setFastRMSThreshold(float threshold)**
 - **uint8_t getFastRMSCycles()**
 - **void setFastRMSCycles(uint8_t cycles)** cycles = 0..7
-- **uint8_t getFrequencyCycles()** cycles = 0..2
-- **void setFrequencyCycles(uint8_t cycles)**
+- **uint8_t getFrequencyCycles()**
+- **void setFrequencyCycles(uint8_t cycles)** cycles = 0..2
+
+#### OutputConfig
+
 - **uint8_t getOutputConfigMask()**
 - **void setOutputConfigMask(uint8_t mask)** mask = 0..63
+
+TODO config register table
+
+#### UserMode
+
 - **uint16_t getUserMode()**
 - **void setUserMode(uint16_t mode)**  mode = 0x0000 .. 0x03FF
+
+TODO mode register table
+
+#### Gain
+
 - **uint8_t getCurrentGain()**
 - **void setCurrentGain(uint8_t gain)**
 
+|  name            |  value  |  gain  |
+|:-----------------|:-------:|:-------|
+|  BL0942_GAIN_1   |   0x00  |    1   |
+|  BL0942_GAIN_4   |   0x01  |    4   |
+|  BL0942_GAIN_16  |   0x02  |   16   |
+|  BL0942_GAIN_24  |   0x03  |   24   |
+
+
 ### Miscelaneous
+
+Read datasheet for details.
 
 TODO elaborate
 
@@ -202,35 +248,43 @@ Has no effect on software SPI.
 - **uint32_t getSPIspeed()** returns SPI transfer rate.
 - **bool usesHWSPI()** returns true / false depending on constructor.
 
-
-3.1.3 Fault Tolerant Mechanism of SPI Interface
-If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI communication interface.
-
+_3.1.3 Fault Tolerant Mechanism of SPI Interface
+If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI communication interface. => **resetSPI()**_
 
 
 ### Error
 
 - **uint8_t getLastError()** returns last error of low level communication.
 
+|  value  |  error                 |  notes  |
+|:-------:|:-----------------------|:--------|
+|     0   |  BL0942_OK             |
+|    -1   |  BL0942_ERR_WRITE      |  not used
+|    -2   |  BL0942_ERR_READ       |  not used
+|    -3   |  BL0942_ERR_CHECKSUM   |
 
 
 ## Future
 
 #### Must
 
+- get API functional complete
+- verify proper working of all functions (configuration ones)
 - improve documentation
 - get hardware to test test and test
-- verify proper working of all functions
-- investigate SELECT pin for SPI
-  - multi device => AND gate with clock pin
+
 
 #### Should
 
+- investigate multi device 
+  - SELECT pin for SPI
+  - multi device => AND gate with clock pin
+  - multiplexer?
 - add examples
-  - calibrate() + manual tuning
 - improve error handling
 - investigate unit tests
-- resetSPI function?  section 3.1.3
+- **resetSPI()** function?  section 3.1.3
+- 
 
 #### Could
 
