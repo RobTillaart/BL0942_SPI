@@ -119,10 +119,15 @@ void BL0942_SPI::calibrate(float shunt, float reductionFactor)
 
   _currentLSB = BL0942_VREF / (BL0942_MAGIC_CURRENT * shunt);
 
+  //  optimized formula
+  //  _powerLSB   = _voltageLSB * _currentLSB * 6.3995208E+06;
+
+  //  reference APP NOTE formula
   _powerLSB   = BL0942_VREF * BL0942_VREF * reductionFactor;
   _powerLSB  /= (BL0942_MAGIC_POWER * shunt);
 
-  _energyLSB  = 1638.4 * 256 * _powerLSB / 3600000;
+  //  optimized formula
+  _energyLSB  = (1638.4 * 256 / 3600000) * _powerLSB;
 }
 
 
@@ -134,6 +139,8 @@ float BL0942_SPI::getVoltageLSB()
 void BL0942_SPI::setVoltageLSB(float voltageLSB)
 {
   _voltageLSB = voltageLSB;
+  // _powerLSB   = _voltageLSB * _currentLSB * 6.3995208E+06;
+  // _energyLSB  = 1638.4 * 256 * _powerLSB / 3600000;
 }
 
 float BL0942_SPI::getCurrentLSB()
@@ -144,6 +151,8 @@ float BL0942_SPI::getCurrentLSB()
 void BL0942_SPI::setCurrentLSB(float currentLSB)
 {
   _currentLSB = currentLSB;
+  // _powerLSB   = _voltageLSB * _currentLSB * 6.3995208E+06;
+  // _energyLSB  = 1638.4 * 256 * _powerLSB / 3600000;
 }
 
 float BL0942_SPI::getPowerLSB()
