@@ -105,7 +105,7 @@ class BL0942_SPI
 public:
   //  HARDWARE SPI
   BL0942_SPI(uint8_t select, __SPI_CLASS__ * mySPI = &SPI);
-  //  SOFTWARE SPI
+  //  SOFTWARE SPI  (dataIn == "MISO", dataOut == "MOSI")
   BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock);
 
   bool     begin();

@@ -16,7 +16,7 @@ Arduino library for BL0942 energy monitor, SPI interface.
 
 ## Description
 
-**Experimental**
+**Experimental - Work in progress**
 
 This library is to use the BL0942 energy monitor.
 The BL0942 is a configurable current and voltage sensor.
@@ -65,7 +65,6 @@ Note from page 20, section 3.1
 
 
 ### Calibration
-
 
 TODO HOW TO
 
@@ -221,13 +220,14 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 
 - improve documentation
 - get hardware to test test and test
+- verify proper working of all functions
 - investigate SELECT pin for SPI
   - multi device => AND gate with clock pin
-
 
 #### Should
 
 - add examples
+  - calibrate() + manual tuning
 - improve error handling
 - investigate unit tests
 - resetSPI function?  section 3.1.3

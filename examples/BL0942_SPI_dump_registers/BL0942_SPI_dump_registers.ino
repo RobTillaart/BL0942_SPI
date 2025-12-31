@@ -2,7 +2,9 @@
 //    FILE: BL0942_SPI_dump_registers.ino
 //  AUTHOR: Rob Tillaart
 // PURPOSE: test basic behaviour
-//     URL: https://github.com/RobTillaart/BL0942_SPI_demo
+//     URL: https://github.com/RobTillaart/BL0942_SPI
+//
+//  need low level readRegister to be public.
 
 
 #include "BL0942_SPI.h"

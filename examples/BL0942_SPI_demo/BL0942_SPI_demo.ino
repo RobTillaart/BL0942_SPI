@@ -1,8 +1,8 @@
 //
-//    FILE: BL0942_SPI_demo_demo.ino
+//    FILE: BL0942_SPI_demo.ino
 //  AUTHOR: Rob Tillaart
 // PURPOSE: test basic behaviour
-//     URL: https://github.com/RobTillaart/BL0942_SPI_demo
+//     URL: https://github.com/RobTillaart/BL0942_SPI
 
 
 #include "BL0942_SPI.h"
