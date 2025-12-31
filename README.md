@@ -68,6 +68,14 @@ Note from page 20, section 3.1
 - three or four wire communication method. In three wire mode, A2_NCS is connected to GND. In four-wire mode, the A2_NCS must be driven low for the entire read or write operation.
 
 
+### Calibration
+
+
+TODO HOW TO
+
+Sketch neeeded
+
+
 ### Warning
 
 _Do not apply this product to safety protection devices or emergency stop equipment,
@@ -79,6 +87,7 @@ and any other applications that may cause personal injury due to the product's f
 TODO
 
 - https://github.com/RobTillaart/printHelpers exponential notation floats
+- https://github.com/SanteriLindfors/BL0942  UART library.
 
 
 ### Tested
@@ -97,6 +106,13 @@ TODO
 - **BL0942_SPI(uint8_t select, __SPI_CLASS__ \* mySPI = &SPI)** hardware SPI.
 - **BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)** software SPI.
 - **bool begin()** initializes internals.
+
+
+### Calibration
+
+
+
+
 
 ### Core
 

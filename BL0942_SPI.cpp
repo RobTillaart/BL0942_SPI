@@ -99,6 +99,51 @@ bool BL0942_SPI::begin()
 
 //////////////////////////////////////////////////////
 //
+//  CALIBRATION
+//
+float BL0942_SPI::getVoltageFactor()
+{
+  return _voltageFactor;
+}
+
+void BL0942_SPI::setVoltageFactor(float voltageFactor)
+{
+  _voltageFactor = voltageFactor;
+}
+
+float BL0942_SPI::getCurrentFactor()
+{
+  return _currentFactor;
+}
+
+void BL0942_SPI::setCurrentFactor(float currentFactor)
+{
+  _currentFactor = currentFactor;
+}
+
+float BL0942_SPI::getPowerFactor()
+{
+  return _powerFactor;
+}
+
+void BL0942_SPI::setPowerFactor(float powerFactor)
+{
+  _powerFactor = powerFactor;
+}
+
+float BL0942_SPI::getEnergyFactor()
+{
+  return _energyFactor;
+}
+
+void BL0942_SPI::setEnergyFactor(float energyFactor)
+{
+  _energyFactor  = energyFactor;
+}
+
+
+//////////////////////////////////////////////////////
+//
 //  READ ONLY REGISTERS
 //
 float BL0942_SPI::getIWave()
@@ -107,7 +152,7 @@ float BL0942_SPI::getIWave()
   //  extend sign bit
   if (raw & 0x00040000) raw |= 0xFFF0000;
   //  TODO formula units?
-  return raw;
+  return raw * _currentFactor;
 }
 
 float BL0942_SPI::getVWave()
@@ -116,7 +161,7 @@ float BL0942_SPI::getVWave()
   //  extend sign bit
   if (raw & 0x00040000) raw |= 0xFFF0000;
   //  TODO formula units?
-  return raw;
+  return raw * _voltageFactor;
 }
 
 float BL0942_SPI::getIRMS()
@@ -124,7 +169,7 @@ float BL0942_SPI::getIRMS()
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_I_RMS);
   //  TODO formula units?
-  return raw;
+  return raw * _currentFactor;
 }
 
 float BL0942_SPI::getVRMS()
@@ -132,7 +177,7 @@ float BL0942_SPI::getVRMS()
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_V_RMS);
   //  TODO formula units?
-  return raw;
+  return raw * _voltageFactor;
 }
 
 float BL0942_SPI::getIRMSFast()
@@ -140,7 +185,7 @@ float BL0942_SPI::getIRMSFast()
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
   //  TODO formula units?
-  return raw;
+  return raw *_currentFactor;
 }
 
 float BL0942_SPI::getWatt()
@@ -149,7 +194,7 @@ float BL0942_SPI::getWatt()
   //  extend sign bit
   if (raw & 0x00800000) raw |= 0xFF00000;
   //  TODO formula units?
-  return raw;
+  return raw * _powerFactor;
 }
 
 uint32_t BL0942_SPI::getCFPulseCount()
@@ -163,7 +208,7 @@ float BL0942_SPI::getFrequency()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_FREQ);
-  //  page 19 formula  default 20000 == 50 Hz (?)
+  //  page 19 formula  default 20000 == 50 Hz
   return 1e6 / raw;
 }
 
@@ -295,10 +340,10 @@ uint8_t BL0942_SPI::getWriteProtect()
   return raw;
 }
 
-void BL0942_SPI::setWriteProtect()
+void BL0942_SPI::setWriteProtect(bool wp)
 {
   const uint32_t WRITE_PROTECT = 0x55;  //  magic number
-  writeRegister(BL0942_REG_USR_WRPROT, WRITE_PROTECT);
+  writeRegister(BL0942_REG_USR_WRPROT, wp ? 0 : WRITE_PROTECT);
 }
 
 

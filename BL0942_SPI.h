@@ -110,6 +110,16 @@ public:
 
   bool     begin();
 
+  //  CALIBRATION
+  float    getVoltageFactor();
+  void     setVoltageFactor(float voltageFactor);
+  float    getCurrentFactor();
+  void     setCurrentFactor(float currentFactor);
+  float    getPowerFactor();
+  void     setPowerFactor(float powerFactor);
+  float    getEnergyFactor();
+  void     setEnergyFactor(float energyFactor);
+
   //  READ ONLY registers
   float    getIWave();
   float    getVWave();
@@ -165,7 +175,7 @@ public:
 
   //  TODO investigate how does this works
   uint8_t  getWriteProtect();
-  void     setWriteProtect();
+  void     setWriteProtect(bool wp);
 
 
   //
@@ -191,6 +201,17 @@ protected:
   uint8_t  _select;
   uint8_t  _clock;
   int      _error;
+
+  //  TODO
+  //  (semi) constants to set in begin() TODO.
+  float    _internVolts  = 1.218;
+  float    _dividerRatio = 1.0;
+  //  how to determine magic numbers
+  float    _powerFactor   = 1.0;
+  float    _voltageFactor = 1.0;
+  float    _currentFactor = 1.0;
+  float    _energyFactor  = 1.0;
+
 
   bool     _hwSPI;
   uint32_t _SPIspeed = 16000000;
