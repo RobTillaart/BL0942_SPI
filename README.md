@@ -42,38 +42,53 @@ There are two different BL0942 modules, one with 10 pins, and one with
 14 pins. The "upper" 10 pins are the same, the 14 pins device has 4 extra.
 
 
-|    name   |  10 pin  |  14 pin  |  description             |
-|:---------:|:--------:|:--------:|:-------------------------|
-|    VDD    |     1    |     1    |  power supply  (3.3V)    |
-|     IP    |     2    |     2    |  current channel         |
-|     IN    |     3    |     3    |  current channel         |
-|     VP    |     4    |     4    |  voltage channel         |
-|    GND    |     5    |     5    |  ground                  |
-|    CF1    |     6    |     6    |  output 1                |
-|    SEL    |     7    |    11    |  LOW = UART  HIGH = SPI  |
-|  CLK/BAUD |     8    |    12    |  SPI clock / BAUD select |
-|   RX/SDI  |     9    |    13    |  serial data in          |
-|   TX/SDO  |    10    |    14    |  serial data out         |
-|           |          |          |                          |
-|    A1     |          |     6    |  address pin (UART)      |
-|  A2_NCS   |          |     7    |  address pin (UART)      |
-|   CF2     |          |     8    |  output 2                |
-|    ZX     |          |     9    |  zero crossing           |
+|    name   |  10 pin  |  14 pin  |  description  |
+|:---------:|:--------:|:--------:|:--------------|
+|    VDD    |     1    |     1    |  power supply  (3.3V)
+|     IP    |     2    |     2    |  current channel
+|     IN    |     3    |     3    |  current channel
+|     VP    |     4    |     4    |  voltage channel
+|    GND    |     5    |     5    |  ground
+|    CF1    |     6    |     6    |  output 1
+|    SEL    |     7    |    11    |  LOW = UART  HIGH = SPI
+|  CLK/BAUD |     8    |    12    |  SPI clock / BAUD select
+|   RX/SDI  |     9    |    13    |  serial data in
+|   TX/SDO  |    10    |    14    |  serial data out
+|           |          |          |
+|    A1     |          |     6    |  address pin, GND in SPI
+|  A2_NCS   |          |     7    |  address pin, SELECT in SPI
+|   CF2     |          |     8    |  output 2
+|    ZX     |          |     9    |  zero crossing
 
 Note: use pull ups on the serial data / clock lines.
 
 
-_Note from page 20, section 3.1
-- three or four wire communication method. In three wire mode, A2_NCS is connected to GND. In four-wire mode, the A2_NCS must be driven low for the entire read or write operation._ 
+From datasheet section 3.1:
 
-TODO Could this work as a SELECT pin for multiple devices?.
+In three wire mode (miso, mosi, clock), A1 and A2_NCS must be connected to GND. 
+There can only be a single device on the SPI bus which is always selected.
+
+In four-wire mode (select, miso, mosi, clock), the A1 pin is connected to GND,
+and the A2_NCS must be driven LOW for the read or write operation.
+
+If the A2 is held HIGH, the A2 bit in the COMMAND byte (write / read) is set HIGH,
+and the device won't recognize the 10101000 (=write) or 01011000 (=read) command.
+By pulling the A2_NCS LOW, that device will recognize the command and will 
+response on the request, either read or write.
+
+In hardware the **select-pin** given in the constructor **MUST** be connected to 
+the **A2_NCS** pin of the devices to implement a proper select.
+Note this will ONLY work with the 14 pins BL0942.
+
 
 
 ### Calibration
 
-TODO describe how to 
+Call **calibrate(shunt, reductionFactor)** with shunt (typical = 0.001) and 
+the reduction factor of the voltage divider (e.g. 4000).
 
-Example sketches neeeded
+The other calibration functions are to manually set the settings, optional adjust 
+the values derived from **calibrate()** call.
 
 
 ### Warning
@@ -84,7 +99,9 @@ and any other applications that may cause personal injury due to the product's f
 
 ### BL0940
 
-Not compatible (possible partial, needs other magic numbers)
+The BL0940 is not compatible, although its internal working is partial similar.
+At least it needs other magic numbers, and has some other registers.
+Support for the BL0940 is not planned.
 
 
 ### Related
@@ -115,12 +132,15 @@ not
 - **BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)** software SPI.
 - **bool begin()** initializes internals.
 
+The select pin should be connected to the A2_NCS pin.
+When pulled LOW this device is selected.
+
 
 ### Calibration 1
 
 - **void calibrate(float shunt, float reductionFactor = 1.0f)**
-calibration of the current measurement based upon the shunt and the 
-calibration of the voltage based upon the reduction factor (ration) 
+calibration of the current measurement based upon the shunt and the
+calibration of the voltage based upon the reduction factor (ration)
 of an optional voltage divider.
 
 Typical values for shunt are in the range 0.001 - 1 Ohm.
@@ -130,7 +150,7 @@ Reduction factor of an ```VDD - R1 - R2 - GND``` ladder:
 RF = (R1 + R2) / R2;  // e.g. R1=20K R2=100 => RF=20100/100=201.
 ```
 
-Note the max current is 30A although one should keep the current under 15A. 
+Note the max current is 30A although one should keep the current under 15A.
 The power dissipated by the shunt can be calculated:
 ```
 P = 25 * 35 * shunt;
@@ -138,7 +158,7 @@ P = 25 * 35 * shunt;
 
 ### Calibration 2
 
-The following functions set the values per LSB directly for the core measurements registers. 
+The following functions set the values per LSB directly for the core measurements registers.
 The getter functions allow (run time) adjustments and help to manually calibrate
 the device more precise.
 
@@ -179,8 +199,8 @@ Read datasheet for details.
 
 TODO
 - not tested
-- find their meaning / how these workor affect measurements. 
-- elaborate API + code details 
+- find their meaning / how these workor affect measurements.
+- elaborate API + code details
 
 #### RMS offset
 
@@ -264,6 +284,20 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 |    -3   |  BL0942_ERR_CHECKSUM   |
 
 
+### Channel selector
+
+TODO elaborate
+
+```cpp
+typedef void (*channelSelector)(bool active);
+```
+
+- **void setChannelSelector(channelSelector selector)**
+- **void ensure_channel_selected(bool active)**
+
+See example.
+
+
 ## Future
 
 #### Must
@@ -276,7 +310,7 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 
 #### Should
 
-- investigate multi device 
+- investigate multi device
   - SELECT pin for SPI
   - multi device => AND gate with clock pin
   - multiplexer?
@@ -284,7 +318,7 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 - improve error handling
 - investigate unit tests
 - **resetSPI()** function?  section 3.1.3
-- 
+-
 
 #### Could
 

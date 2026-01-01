@@ -83,7 +83,7 @@ BL0942_SPI::BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t 
 bool BL0942_SPI::begin()
 {
   pinMode(_select, OUTPUT);
-  digitalWrite(_select, HIGH);  //  TODO CHECK
+  digitalWrite(_select, HIGH);  //  NOT selected.
 
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 
@@ -423,6 +423,10 @@ int BL0942_SPI::getLastError()
 //
 //  PROTECTED
 //
+#define BL0942_CMD_WRITE                  0xA8
+#define BL0942_CMD_READ                   0x58
+
+
 int BL0942_SPI::writeRegister(uint8_t regAddr, uint32_t value)
 {
   uint8_t checkSum = 0;
@@ -432,10 +436,10 @@ int BL0942_SPI::writeRegister(uint8_t regAddr, uint32_t value)
   if (_hwSPI)  //  Hardware SPI
   {
     _mySPI->beginTransaction(_spi_settings);
-    digitalWrite(_select, LOW);
-    _mySPI->transfer(0xA8);       //  WRITE_COMMAND
+    digitalWrite(_select, LOW);   //  select
+    _mySPI->transfer(BL0942_CMD_WRITE);
     _mySPI->transfer(regAddr);
-    checkSum = 0xA8 + regAddr;
+    checkSum = BL0942_CMD_WRITE + regAddr;
     while (bytes--)
     {
       uint8_t val = value >> (bytes * 8);
@@ -451,9 +455,9 @@ int BL0942_SPI::writeRegister(uint8_t regAddr, uint32_t value)
   else         //  Software SPI
   {
     digitalWrite(_select, LOW);
-    swSPI_transfer(0xA8);       //  WRITE_COMMAND
+    swSPI_transfer(BL0942_CMD_WRITE);
     swSPI_transfer(regAddr);
-    checkSum = 0xA8 + regAddr;
+    checkSum = BL0942_CMD_WRITE + regAddr;
     while (bytes--)
     {
       uint8_t val = value >> (bytes * 8);
@@ -479,8 +483,8 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
   if (_hwSPI)  //  Hardware SPI
   {
     _mySPI->beginTransaction(_spi_settings);
-    digitalWrite(_select, LOW);
-    _mySPI->transfer(0x58);       //  READ_COMMAND
+    digitalWrite(_select, LOW);   //  select device
+    _mySPI->transfer(BL0942_CMD_READ);
     _mySPI->transfer(regAddr);
 
     while (bytes--)
@@ -499,8 +503,8 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
   }
   else      //  Software SPI
   {
-    digitalWrite(_select, LOW);
-    swSPI_transfer(0x58);       //  READ_COMMAND
+    digitalWrite(_select, LOW);   //  select device
+    swSPI_transfer(BL0942_CMD_READ);
     swSPI_transfer(regAddr);
 
     while (bytes--)

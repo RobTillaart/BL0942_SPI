@@ -194,6 +194,27 @@ public:
   uint32_t readRegister(uint8_t regAddr);
 
 
+  //
+  //  CHANNEL-SELECTOR
+  //  in .h file for now.
+  //
+  //
+  typedef void (*channelSelector)(bool active);
+
+  void setChannelSelector(channelSelector selector)
+  {
+     _selector = selector;
+  }
+
+  void ensure_channel_selected(bool active)
+  {
+    if (_selector) _selector(active);
+    else digitalWrite(_select, active ? LOW : HIGH);
+  }
+
+  channelSelector _selector = nullptr;
+
+
 protected:
   uint8_t  _dataOut;
   uint8_t  _dataIn;
@@ -220,6 +241,7 @@ protected:
   // int      writeRegister(uint8_t regAddr, uint32_t value);
   // uint32_t readRegister(uint8_t regAddr);
   uint8_t  swSPI_transfer(uint8_t val);
+
 };
 
 
