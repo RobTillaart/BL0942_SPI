@@ -85,6 +85,7 @@ bool BL0942_SPI::begin()
   pinMode(_select, OUTPUT);
   digitalWrite(_select, HIGH);  //  HIGH == NOT selected.
 
+  if (_SPIspeed > 900000) _SPIspeed = 900000;
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 
   if(_hwSPI)
@@ -515,7 +516,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
       checkSum += value;
     }
     uint8_t crc = swSPI_transfer(0x00);
-    if (crc != checkSum)
+    if (crc != (checkSum ^ 0xFF))
     {
       _error = BL0942_ERR_CHECKSUM;
     }
@@ -542,6 +543,8 @@ uint8_t BL0942_SPI::swSPI_transfer(uint8_t val)
     {
       value |= mask;
     }
+    //  force below 900.000 Hz rate (TODO add define, configurable)
+    delayMicroseconds(1);
   }
   return value;
 }

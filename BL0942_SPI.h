@@ -238,7 +238,7 @@ protected:
 
 
   bool     _hwSPI;
-  uint32_t _SPIspeed = 16000000;
+  uint32_t _SPIspeed = 800000;
   __SPI_CLASS__ * _mySPI;
   SPISettings   _spi_settings;
 

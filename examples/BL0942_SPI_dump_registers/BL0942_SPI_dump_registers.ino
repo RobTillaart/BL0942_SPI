@@ -10,7 +10,8 @@
 #include "BL0942_SPI.h"
 
 
-BL0942_SPI mySensor(4, 5, 6, 7);
+//BL0942_SPI mySensor(4, 5, 6, 7);
+BL0942_SPI mySensor(4, &SPI);
 
 
 void setup()
@@ -26,10 +27,10 @@ void setup()
 
   mySensor.begin();
 
-  //  numbers from the BL0942 APP NOTE 
+  //  numbers from the BL0942 APP NOTE
   float RF = (390000.0 * 5 + 510.0) / 510.0;
   float SHUNT = 0.001;
-  
+
   mySensor.calibrate(SHUNT, RF);  //  shunt in ohm, reduction factor voltage.
 
 
