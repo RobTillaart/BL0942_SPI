@@ -65,22 +65,6 @@ const int BL0942_MODE_UART_38400          = 0x0300;
 
 
 //
-//  MODE REGISTER (0x19) BIT MSKS
-//  read datasheet page 10 for details
-//
-const int BL0942_MODE_RMS_WAVEFORM_FULL   = 0x00;
-const int BL0942_MODE_RMS_WAVEFORM_AC     = 0x10;
-const int BL0942_MODE_AC_FREQUENCY_50HZ   = 0x00;
-const int BL0942_MODE_AC_FREQUENCY_60HZ   = 0x20;
-const int BL0942_MODE_CNT_CLR_SEL_DISABLE = 0x00;
-const int BL0942_MODE_CNT_CLR_SEL_ENABLE  = 0x40;
-const int BL0942_MODE_ACCU_MODE_ALGEBRAIC = 0x00;
-const int BL0942_MODE_ACCU_MODE_ABSOLUTE  = 0x80;
-
-
-
-
-//
 //  OUTPUT CONFIG REGISTER (0x18) BIT MASKS
 //  read datasheet page 11 for details
 //
