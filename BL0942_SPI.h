@@ -46,16 +46,38 @@ const int BL0942_ERR_CHECKSUM = -3;
 //  MODE REGISTER (0x19) BIT MASKS
 //  read datasheet page 10 for details
 //
-const int BL0942_MODE_CF_ENABLE  = 0x004;
-const int BL0942_MODE_RMS_UPDATE = 0x008;  //  0 = 400ms, 1 = 800 ms;
-const int BL0942_MODE_RMS_FAST   = 0x010;  //  0 = full wave, 1 = AC Wave
-const int BL0942_MODE_AC_FREQ    = 0x020;  //  0 = 50 Hz, 1 = 60 Hz
-const int BL0942_MODE_CF_CNT_CLR = 0x040;
-const int BL0942_MODE_CF_CNT_ADD = 0x080;
-const int BL0942_MODE_UART_4800  = 0x000;
-const int BL0942_MODE_UART_9600  = 0x100;
-const int BL0942_MODE_UART_19200 = 0x200;
-const int BL0942_MODE_UART_38400 = 0x300;
+const int BL0942_MODE_CF_DISABLE          = 0x0000;
+const int BL0942_MODE_CF_ENABLE           = 0x0004;
+const int BL0942_MODE_RMS_UPDATE_400MS    = 0x0000;
+const int BL0942_MODE_RMS_UPDATE_800MS    = 0x0008;
+const int BL0942_MODE_RMS_WAVEFORM_FULL   = 0x0000;
+const int BL0942_MODE_RMS_WAVEFORM_AC     = 0x0010;
+const int BL0942_MODE_AC_FREQUENCY_50HZ   = 0x0000;
+const int BL0942_MODE_AC_FREQUENCY_60HZ   = 0x0020;
+const int BL0942_MODE_CNT_CLR_SEL_DISABLE = 0x0000;
+const int BL0942_MODE_CNT_CLR_SEL_ENABLE  = 0x0040;
+const int BL0942_MODE_ACCU_MODE_ALGEBRAIC = 0x0000;
+const int BL0942_MODE_ACCU_MODE_ABSOLUTE  = 0x0080;
+const int BL0942_MODE_UART_4800           = 0x0000;
+const int BL0942_MODE_UART_9600           = 0x0100;
+const int BL0942_MODE_UART_19200          = 0x0200;
+const int BL0942_MODE_UART_38400          = 0x0300;
+
+
+//
+//  MODE REGISTER (0x19) BIT MSKS
+//  read datasheet page 10 for details
+//
+const int BL0942_MODE_RMS_WAVEFORM_FULL   = 0x00;
+const int BL0942_MODE_RMS_WAVEFORM_AC     = 0x10;
+const int BL0942_MODE_AC_FREQUENCY_50HZ   = 0x00;
+const int BL0942_MODE_AC_FREQUENCY_60HZ   = 0x20;
+const int BL0942_MODE_CNT_CLR_SEL_DISABLE = 0x00;
+const int BL0942_MODE_CNT_CLR_SEL_ENABLE  = 0x40;
+const int BL0942_MODE_ACCU_MODE_ALGEBRAIC = 0x00;
+const int BL0942_MODE_ACCU_MODE_ABSOLUTE  = 0x80;
+
+
 
 
 //
@@ -96,6 +118,8 @@ const int BL0942_GAIN_1  = 0x00;
 const int BL0942_GAIN_4  = 0x01;
 const int BL0942_GAIN_16 = 0x02;  //  default
 const int BL0942_GAIN_24 = 0x03;
+
+
 
 
 
