@@ -130,7 +130,6 @@ void BL0942_SPI::calibrate(float shunt, float reductionFactor)
   _energyLSB  = (1638.4 * 256 / 3600000) * _powerLSB;
 }
 
-
 float BL0942_SPI::getVoltageLSB()
 {
   return _voltageLSB;
@@ -486,6 +485,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     digitalWrite(_select, LOW);   //  select device
     _mySPI->transfer(BL0942_CMD_READ);
     _mySPI->transfer(regAddr);
+    checksum = BL0942_CMD_READ + regAddr;
 
     while (bytes--)
     {
@@ -494,7 +494,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
       value <<= 8;
     }
     uint8_t crc = _mySPI->transfer(0x00);
-    if (crc != checkSum)
+    if (crc != (checkSum ^ 0xFF))
     {
       _error = BL0942_ERR_CHECKSUM;
     }
@@ -506,6 +506,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     digitalWrite(_select, LOW);   //  select device
     swSPI_transfer(BL0942_CMD_READ);
     swSPI_transfer(regAddr);
+    checksum = BL0942_CMD_READ + regAddr;
 
     while (bytes--)
     {
