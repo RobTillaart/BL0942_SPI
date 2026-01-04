@@ -489,9 +489,9 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
 
     while (bytes--)
     {
+      value <<= 8;
       value += _mySPI->transfer(0x00);
       checkSum += value;
-      value <<= 8;
     }
     uint8_t crc = _mySPI->transfer(0x00);
     if (crc != (checkSum ^ 0xFF))
@@ -510,9 +510,9 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
 
     while (bytes--)
     {
+      value <<= 8;
       value += swSPI_transfer(0x00);
       checkSum += value;
-      value <<= 8;
     }
     uint8_t crc = swSPI_transfer(0x00);
     if (crc != checkSum)
