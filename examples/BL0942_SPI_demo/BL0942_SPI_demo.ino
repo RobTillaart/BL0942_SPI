@@ -24,7 +24,12 @@ void setup()
 
   mySensor.begin();
 
-  mySensor.calibrate(0.001, 1);  //  shunt in ohm, reduction factor voltage.
+  //  numbers from the BL0942 APP NOTE 
+  float RF = (390000.0 * 5 + 510.0) / 510.0;
+  float SHUNT = 0.001;
+  
+  mySensor.calibrate(SHUNT, RF);  //  shunt in ohm, reduction factor voltage.
+
 
   Serial.println("get all registers");
   Serial.println("READ ONLY\n");

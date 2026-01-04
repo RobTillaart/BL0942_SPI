@@ -104,10 +104,6 @@ const int BL0942_GAIN_16 = 0x02;  //  default
 const int BL0942_GAIN_24 = 0x03;
 
 
-
-
-
-
 class BL0942_SPI
 {
 public:

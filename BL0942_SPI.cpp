@@ -83,7 +83,7 @@ BL0942_SPI::BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t 
 bool BL0942_SPI::begin()
 {
   pinMode(_select, OUTPUT);
-  digitalWrite(_select, HIGH);  //  NOT selected.
+  digitalWrite(_select, HIGH);  //  HIGH == NOT selected.
 
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 
