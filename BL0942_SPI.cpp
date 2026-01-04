@@ -485,7 +485,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     digitalWrite(_select, LOW);   //  select device
     _mySPI->transfer(BL0942_CMD_READ);
     _mySPI->transfer(regAddr);
-    checksum = BL0942_CMD_READ + regAddr;
+    checkSum = BL0942_CMD_READ + regAddr;
 
     while (bytes--)
     {
@@ -506,7 +506,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     digitalWrite(_select, LOW);   //  select device
     swSPI_transfer(BL0942_CMD_READ);
     swSPI_transfer(regAddr);
-    checksum = BL0942_CMD_READ + regAddr;
+    checkSum = BL0942_CMD_READ + regAddr;
 
     while (bytes--)
     {
