@@ -128,7 +128,10 @@ not
 
 ### Constructor
 
-- **BL0942_SPI(uint8_t select, __SPI_CLASS__ \* mySPI = &SPI)** hardware SPI.
+- **BL0942_SPI(__SPI_CLASS__ \* mySPI = &SPI)** hardware SPI without select pin.
+For single device or external channelSelector.
+- **BL0942_SPI(uint8_t select, __SPI_CLASS__ \* mySPI = &SPI)** hardware SPI 
+with select pin. For multiple devices.
 - **BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)** software SPI.
 - **bool begin()** initializes internals.
 

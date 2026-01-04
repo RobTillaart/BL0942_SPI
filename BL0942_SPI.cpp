@@ -56,6 +56,11 @@ const float BL0942_MAGIC_POWER   = 3537000000;
 //
 //  HARDWARE SPI
 //
+BL0942_SPI::BL0942_SPI(__SPI_CLASS__ * mySPI)
+{
+  BL0942_SPI(255, mySPI);
+}
+
 BL0942_SPI::BL0942_SPI(uint8_t select, __SPI_CLASS__ * mySPI)
 {
   _select   = select;
