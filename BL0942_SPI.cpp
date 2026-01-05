@@ -46,7 +46,8 @@
 //
 //  CALIBRATION MAGIC NUMBERS
 //  extracted from app note (Chinese)
-//
+//  + page 17 datasheet
+//  these constants have the factor 1000 for mV and mA in it.
 const float BL0942_VREF          = 1.218;
 const float BL0942_MAGIC_CURRENT = 305978000;
 const float BL0942_MAGIC_VOLT    = 73989000;
@@ -222,7 +223,7 @@ float BL0942_SPI::getIRMSFast()
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
   //  RMS factor?
-  return raw *_currentLSB;
+  return raw * _currentLSB;
 }
 
 float BL0942_SPI::getWatt()
@@ -255,10 +256,12 @@ float BL0942_SPI::getFrequency()
   return 1e6 / raw;
 }
 
+//  only 10 bits defined,
+//  see BL0942.h file
 uint16_t BL0942_SPI::getStatus()
 {
   uint32_t raw = readRegister(BL0942_REG_STATUS);
-  return raw & 0x03FF;  //  only 10 bits
+  return raw & 0x03FF;
 }
 
 
@@ -270,32 +273,38 @@ float BL0942_SPI::getCurrentRMSOffset()
 {
   int32_t raw = readRegister(BL0942_REG_I_RMSOS);
   //  TODO formula units?
+  //  _currentLSB  ?
   return raw;
 }
 
 void BL0942_SPI::setCurrentRMSOffset(float offset)
 {
-  uint8_t raw = offset;
+  uint8_t raw = offset;  //  _currentLSB  ?
   writeRegister(BL0942_REG_I_RMSOS, raw);
 }
 
 float BL0942_SPI::getPowerCreep()
 {
   int32_t raw = readRegister(BL0942_REG_WA_CREEP);
-  //  TODO formula units?
-  return raw;
+  float watt = raw * (3125.0/256.0);
+  return watt;
 }
 
-void BL0942_SPI::setPowerCreep(float creep)
+void BL0942_SPI::setPowerCreep(float watt)
 {
-  uint8_t raw = creep;
+  uint8_t raw = watt * (256.0 / 3125.0);
   writeRegister(BL0942_REG_WA_CREEP, raw);
 }
 
+//  threshold = Ampere
+//  If I_FAST_RMS[23:8] >= I_FAST_RMS_TH[15:0] ==> flag
+//  ???  only 16 upper bits compared to 16 bit value
+//  ==> there must be a factor 256 somewhere.
 float BL0942_SPI::getFastRMSThreshold()
 {
   uint16_t raw = readRegister(BL0942_REG_I_FAST_RMS_TH);
   //  TODO formula units?
+  //  raw * _currentLSB * 256;
   return raw;
 }
 
@@ -305,18 +314,25 @@ void BL0942_SPI::setFastRMSThreshold(float threshold)
   writeRegister(BL0942_REG_I_FAST_RMS_TH, raw);
 }
 
+
 uint8_t BL0942_SPI::getFastRMSCycles()
 {
   uint8_t raw = readRegister(BL0942_REG_I_FAST_RMS_CYC);
   return raw;
 }
 
+//  0    == 0.5 cycles
+//  1    == 1 cycles
+//  2    == 2 cycles
+//  3    == 4 cycles
+//  4..7 == 8 cycles
 void BL0942_SPI::setFastRMSCycles(uint8_t cycles)
 {
   uint8_t raw = cycles;
   if (raw > 7) raw = 7;
   writeRegister(BL0942_REG_I_FAST_RMS_CYC, raw);
 }
+
 
 uint8_t BL0942_SPI::getFrequencyCycles()
 {
@@ -399,6 +415,7 @@ void BL0942_SPI::setSPIspeed(uint32_t speed)
   //  datasheet page 20, section 3.1
   //  900 KHz max datasheet
   _SPIspeed = speed;
+  if (_SPIspeed >= 900000) _SPIspeed = 900000;
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 }
 

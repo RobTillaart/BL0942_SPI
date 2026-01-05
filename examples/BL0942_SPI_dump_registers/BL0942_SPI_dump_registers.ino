@@ -11,7 +11,7 @@
 
 
 //BL0942_SPI mySensor(4, 5, 6, 7);
-BL0942_SPI mySensor(4, &SPI);
+BL0942_SPI mySensor(255, &SPI);
 
 
 void setup()

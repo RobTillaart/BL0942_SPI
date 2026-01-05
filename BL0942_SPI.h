@@ -10,9 +10,9 @@
 //  uses MODE1, CPOL = 0, CPHA = 1
 //
 //  explain connections for SPI
-//  UART/SPI mode selection (0: UART 1: SPI), internal pull-down resistance,
+//  UART/SPI mode selection (0==UART 1==SPI), internal pull-down resistor,
 //  connected to GND is 0 level (UART),
-//  connected directly to VDD is high level (SPI)
+//  connected to VDD is high level (SPI)
 
 
 #include "Arduino.h"
@@ -45,10 +45,11 @@ const int BL0942_ERR_CHECKSUM = -3;
 //
 //  MODE REGISTER (0x19) BIT MASKS
 //  read datasheet page 10 for details
+//  bits 0,1,10..15 are reserved.
 //
 const int BL0942_MODE_CF_DISABLE          = 0x0000;
 const int BL0942_MODE_CF_ENABLE           = 0x0004;
-const int BL0942_MODE_RMS_UPDATE_400MS    = 0x0000;
+const int BL0942_MODE_RMS_UPDATE_400MS    = 0x0000;  //  default
 const int BL0942_MODE_RMS_UPDATE_800MS    = 0x0008;
 const int BL0942_MODE_RMS_WAVEFORM_FULL   = 0x0000;
 const int BL0942_MODE_RMS_WAVEFORM_AC     = 0x0010;
@@ -132,7 +133,7 @@ public:
   float    getVWave();
   float    getIRMS();
   float    getVRMS();
-  float    getIRMSFast();
+  float    getIRMSFast();     //  see setFastRMSThreshold()
   float    getWatt();
   uint32_t getCFPulseCount();
   float    getEnergy();       //  kWh
@@ -143,28 +144,45 @@ public:
 
 
   //  READ WRITE registers
-  //  offset = ??
+  //  TODO offset = ??  units?
   float    getCurrentRMSOffset();
   void     setCurrentRMSOffset(float offset);
 
-  //  creep = ??
-  float    getPowerCreep();
-  void     setPowerCreep(float creep);
 
-  //  threshold = ??
+  //  watt = creep level in Watt.
+  float    getPowerCreep();
+  void     setPowerCreep(float watt);
+
+
+  //  TODO threshold = Ampere
+  //  If I_FAST_RMS[23:8] >= I_FAST_RMS_TH[15:0] ==> flag
+  //  ???  only 16 upper bits compared to 16 bit value
+  //  ==> there must be a factor 256 somewhere.
   float    getFastRMSThreshold();
   void     setFastRMSThreshold(float threshold);
 
-  //  cycles = 0..7
+
+  //  TODO constants?
+  //  cycles
+  //  0    == 0.5 cycles
+  //  1    == 1 cycles
+  //  2    == 2 cycles
+  //  3    == 4 cycles
+  //  4..7 == 8 cycles  (values above 7 => 7)
   uint8_t  getFastRMSCycles();
   void     setFastRMSCycles(uint8_t cycles);
 
-  //  cycles = 0..2
+
+  //  cycles
+  //  0 == 2 cycles
+  //  1 == 4 cycles
+  //  2 == 8 cycles
+  //  3 == 16 cycles  (values above 3 => 3)
   uint8_t  getFrequencyCycles();
   void     setFrequencyCycles(uint8_t cycles);
 
   //  bit masks see above
-  //  mask = 0..63
+  //  mask = 0..0x3F
   uint8_t  getOutputConfigMask();
   void     setOutputConfigMask(uint8_t mask);
 
@@ -175,10 +193,18 @@ public:
 
   //  bit masks see above
   //  gain = 0..3
+  //  0 == 1x
+  //  1 == 4x
+  //  2 == 16x
+  //  3 == 24x  (values above 3 ==> 3)
   uint8_t  getCurrentGain();
   void     setCurrentGain(uint8_t gain);
 
   void     softReset();
+
+  //  TODO this way or inverse?
+  //  true  = write protected
+  //  false = write allowed
   uint8_t  getWriteProtect();
   void     setWriteProtect(bool wp);
 
@@ -202,7 +228,6 @@ public:
   //
   //  CHANNEL-SELECTOR
   //  in .h file for now.
-  //
   //
   typedef void (*channelSelector)(bool active);
 
