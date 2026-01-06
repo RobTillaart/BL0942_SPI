@@ -29,7 +29,7 @@ The device is a SPI slave, which works in half duplex mode,
 at a maximum clock rate of 900 kHz.
 It is not tested if it works well beyond that speed.
 
-The library is not tested with hardware yet, so use with care.
+The library is under test with hardware, so use with care.
 
 Feedback as always is welcome.
 
@@ -116,7 +116,7 @@ Application notes
 
 ### Tested
 
-extern
+In progress.
 
 
 ## Interface
@@ -361,20 +361,13 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 
 ----
 
-## Derived Class OKNX_BL0942_SPI
+## Open KNX extra API
 
 Created on request for Open KNX project.
+For documentation see OKNX.
 
-### Channel selector
-
-TODO elaborate
-
-Works with dependency injection
-
-- **void setChannelSelector(SwitchActuatorChannel \* sac)**
-- **void ensure_channel_selected(bool active)**
-
-See example OKNX_BL0942_SPI_test.ino (simulates the OKNX a bit).
+- **void setChannelSelector(ChannelSelector selector)**
+To set the channel selector call back function.
 
 
 ## Future

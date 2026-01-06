@@ -11,16 +11,19 @@
 //
 //  explain connections for SPI
 //  UART/SPI mode selection (0==UART 1==SPI), internal pull-down resistor,
-//  connected to GND is 0 level (UART),
+//  connected to GND is 0 level (UART == not supported in this library)
 //  connected to VDD is high level (SPI)
 
 
 #include "Arduino.h"
 #include "SPI.h"
 
+
+//  Open KNX extra API  (Andreas B.)
 #ifdef BL0942_SPI_CALLBACK
 #include <functional>
 #endif
+
 
 #define BL0942_SPI_LIB_VERSION         (F("0.1.0"))
 
@@ -119,10 +122,12 @@ public:
 
   bool     begin();
 
+  //  Open KNX extra API
 #ifdef BL0942_SPI_CALLBACK
   using ChannelSelector = std::function<void(bool active)>;
   void setChannelSelector(ChannelSelector selector);
 #endif
+
 
   //  CALIBRATION
   void     calibrate(float shunt, float reductionFactor = 1.0f);
@@ -232,7 +237,7 @@ public:
   uint32_t readRegister(uint8_t regAddr);
 
 
-protected:
+private:
   uint8_t  _dataOut;
   uint8_t  _dataIn;
   uint8_t  _select;
@@ -256,7 +261,7 @@ protected:
   // uint32_t readRegister(uint8_t regAddr);
   uint8_t  swSPI_transfer(uint8_t val);
 
-  void ensureChannelSelected(bool active);
+  void select(bool active);
 
 #ifdef BL0942_SPI_CALLBACK
   ChannelSelector _channelSelector = nullptr;
