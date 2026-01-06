@@ -225,26 +225,6 @@ public:
   uint32_t readRegister(uint8_t regAddr);
 
 
-  //
-  //  CHANNEL-SELECTOR
-  //  in .h file for now.
-  //
-  typedef void (*channelSelector)(bool active);
-
-  void setChannelSelector(channelSelector selector)
-  {
-     _selector = selector;
-  }
-
-  void ensure_channel_selected(bool active)
-  {
-    if (_selector) _selector(active);
-    else digitalWrite(_select, active ? LOW : HIGH);
-  }
-
-  channelSelector _selector = nullptr;
-
-
 protected:
   uint8_t  _dataOut;
   uint8_t  _dataIn;
@@ -275,9 +255,45 @@ protected:
 };
 
 
+//////////////////////////////////////////////////////////////////////
+//
+//  DERIVED CLASS FOR OPEN KNX
+//  Andreas B.
+//
+#ifdef OPENKNX_SWA_BL0942_SPI
+
+class OKNX_BL0942_SPI : public BL0942_SPI
+{
+public:
+  //  HW SPI
+  OKNX_BL0942_SPI(__SPI_CLASS__ * mySPI = &SPI) 
+      : BL0942_SPI(mySPI)
+  {};
+  OKNX_BL0942_SPI(uint8_t select, __SPI_CLASS__ * mySPI = &SPI) 
+      : BL0942_SPI(select, mySPI)
+  {};
+  //  SW SPI
+  OKNX_BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)
+      : BL0942_SPI(select, dataIn, dataOut, clock)
+  {};
+
+
+  void setChannelSelector(SwitchActuatorChannel * sac)
+  {
+     _sac = sac;
+  }
+
+  void ensure_channel_selected(bool active)
+  {
+    if (_sac) _sac->bl0942ChannelSelector(active);
+    else digitalWrite(_select, active ? LOW : HIGH);
+  }
+
+  SwitchActuatorChannel * _sac;
+};
+
+#endif
+
+
 //  -- END OF FILE --
-
-
-
-
 

@@ -91,8 +91,7 @@ bool BL0942_SPI::begin()
   pinMode(_select, OUTPUT);
   digitalWrite(_select, HIGH);  //  HIGH == NOT selected.
 
-  if (_SPIspeed > 900000) _SPIspeed = 900000;
-  _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
+  setSPIspeed(900000);
 
   if(_hwSPI)
   {
@@ -415,7 +414,7 @@ void BL0942_SPI::setSPIspeed(uint32_t speed)
   //  datasheet page 20, section 3.1
   //  900 KHz max datasheet
   _SPIspeed = speed;
-  if (_SPIspeed >= 900000) _SPIspeed = 900000;
+  if (_SPIspeed > 900000) _SPIspeed = 900000;
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 }
 
