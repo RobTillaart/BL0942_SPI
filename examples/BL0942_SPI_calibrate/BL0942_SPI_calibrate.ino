@@ -31,6 +31,8 @@ void setup()
   
   mySensor.calibrate(SHUNT, RF);  //  shunt in ohm, reduction factor voltage.
 
+  Serial.print("SHUNT:\t");
+  Serial.println(SHUNT, 4);
   Serial.print("RF:\t");
   Serial.println(RF, 2);
   Serial.println();
