@@ -88,9 +88,11 @@ BL0942_SPI::BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t 
 
 bool BL0942_SPI::begin()
 {
+#ifndef BL0942_SPI_CALLBACK
   pinMode(_select, OUTPUT);
-  digitalWrite(_select, HIGH);  //  HIGH == NOT selected.
+#endif
 
+  ensureChannelSelected(false);
   setSPIspeed(900000);
 
   if(_hwSPI)
@@ -457,7 +459,7 @@ int BL0942_SPI::writeRegister(uint8_t regAddr, uint32_t value)
   if (_hwSPI)  //  Hardware SPI
   {
     _mySPI->beginTransaction(_spi_settings);
-    digitalWrite(_select, LOW);   //  select
+    ensureChannelSelected(true);
     _mySPI->transfer(BL0942_CMD_WRITE);
     _mySPI->transfer(regAddr);
     checkSum = BL0942_CMD_WRITE + regAddr;
@@ -470,12 +472,12 @@ int BL0942_SPI::writeRegister(uint8_t regAddr, uint32_t value)
     //  INVERT CHECKSUM
     checkSum ^= 0xFF;
     _mySPI->transfer(checkSum);
-    digitalWrite(_select, HIGH);
+    ensureChannelSelected(false);
     _mySPI->endTransaction();
   }
   else         //  Software SPI
   {
-    digitalWrite(_select, LOW);
+    ensureChannelSelected(true);
     swSPI_transfer(BL0942_CMD_WRITE);
     swSPI_transfer(regAddr);
     checkSum = BL0942_CMD_WRITE + regAddr;
@@ -488,7 +490,7 @@ int BL0942_SPI::writeRegister(uint8_t regAddr, uint32_t value)
     //  INVERT CHECKSUM
     checkSum ^= 0xFF;
     swSPI_transfer(checkSum);
-    digitalWrite(_select, HIGH);
+    ensureChannelSelected(false);
   }
   return _error;
 }
@@ -504,7 +506,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
   if (_hwSPI)  //  Hardware SPI
   {
     _mySPI->beginTransaction(_spi_settings);
-    digitalWrite(_select, LOW);   //  select device
+    ensureChannelSelected(true);
     _mySPI->transfer(BL0942_CMD_READ);
     _mySPI->transfer(regAddr);
     checkSum = BL0942_CMD_READ + regAddr;
@@ -520,12 +522,12 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     {
       _error = BL0942_ERR_CHECKSUM;
     }
-    digitalWrite(_select, HIGH);
+    ensureChannelSelected(false);
     _mySPI->endTransaction();
   }
   else      //  Software SPI
   {
-    digitalWrite(_select, LOW);   //  select device
+    ensureChannelSelected(true);
     swSPI_transfer(BL0942_CMD_READ);
     swSPI_transfer(regAddr);
     checkSum = BL0942_CMD_READ + regAddr;
@@ -541,7 +543,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     {
       _error = BL0942_ERR_CHECKSUM;
     }
-    digitalWrite(_select, HIGH);
+    ensureChannelSelected(false);
   }
   //  debugging
   //  Serial.println(value, HEX);
@@ -568,6 +570,22 @@ uint8_t BL0942_SPI::swSPI_transfer(uint8_t val)
     delayMicroseconds(1);
   }
   return value;
+}
+
+#ifdef BL0942_SPI_CALLBACK
+void BL0942_SPI::setChannelSelector(ChannelSelector selector) {
+  _channelSelector = selector;
+}
+#endif
+
+void BL0942_SPI::ensureChannelSelected(bool active)
+{
+#ifdef BL0942_SPI_CALLBACK
+  if (_channelSelector)
+    _channelSelector(active);
+#else
+  digitalWrite(_select, active ? LOW : HIGH);
+#endif
 }
 
 
