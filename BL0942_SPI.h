@@ -170,7 +170,6 @@ public:
   void     setFastRMSThreshold(float threshold);
 
 
-  //  TODO constants?
   //  cycles
   //  0    == 0.5 cycles
   //  1    == 1 cycles
@@ -240,15 +239,12 @@ protected:
   uint8_t  _clock;
   int      _error;
 
-  //  TODO
-  //  (semi) constants to set in begin() TODO.
-  float    _internVolts  = 1.218;
-  float    _dividerRatio = 1.0;
-  //  how to determine magic numbers
-  float    _powerLSB   = 1.0;
-  float    _voltageLSB = 1.0;
-  float    _currentLSB = 1.0;
-  float    _energyLSB  = 1.0;
+  //  (semi) constants to set in calibrate() et al..
+  float    _internVolts   = 1.218;
+  float    _powerLSB      = 1.0;
+  float    _voltageLSB    = 1.0;
+  float    _currentLSB    = 1.0;
+  float    _energyLSB     = 1.0;
 
 
   bool     _hwSPI;
