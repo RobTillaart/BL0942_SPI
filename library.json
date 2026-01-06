@@ -8,7 +8,13 @@
       "name": "Rob Tillaart",
       "email": "Rob.Tillaart@gmail.com",
       "maintainer": true
-    }
+    },
+    {
+      "name": "Andreas Breitschopp",
+      "email": "",
+      "maintainer": false
+    },
+    
   ],
   "repository":
   {

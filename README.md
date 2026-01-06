@@ -18,10 +18,14 @@ Arduino library for BL0942 energy monitor, SPI interface.
 
 **Experimental - Work in progress**
 
-Note: this is work in progress, not functional complete yet.
+This Arduino library is to use the BL0942 energy monitor.
+The BL0942 is a configurable current and voltage sensor. 
+It also provides power and energy usage.
 
-This library is to use the BL0942 energy monitor.
-The BL0942 is a configurable current and voltage sensor.
+The library was requested by Andreas Breitschopp, as alternative for 
+the UART library for the BL0942. 
+Andreas co-developed part of the code and did most of the testing
+
 This library only implements and supports the SPI interface.
 Therefore the SEL (protocol select) pin must be connected to HIGH (3.3V).
 
@@ -29,7 +33,7 @@ The device is a SPI slave, which works in half duplex mode,
 at a maximum clock rate of 900 kHz.
 It is not tested if it works well beyond that speed.
 
-The library is under test with hardware, so use with care.
+The library is still under test / development with hardware, so use with care.
 
 Feedback as always is welcome.
 
@@ -106,8 +110,13 @@ Support for the BL0940 is not planned.
 ### Related
 
 - https://www.belling.com.cn/product_info.html?id=753  latest datasheet
+- https://github.com/RobTillaart/BL0942 this library
+- https://github.com/RobTillaart/INA226 I2C current and voltage sensor (one of many)
 - https://github.com/RobTillaart/printHelpers exponential notation floats
-- https://github.com/SanteriLindfors/BL0942  UART library.
+
+
+UART library for the BL0942
+- https://github.com/SanteriLindfors/BL0942
 
 
 Application notes
@@ -374,11 +383,12 @@ To set the channel selector call back function.
 
 #### Must
 
-- get API functional complete
-- verify proper working of all functions (configuration ones)
 - improve documentation
-- get hardware to test test and test
-- fix TODO's in documentation and code
+  - fix / fill TODO's
+- get API functional complete
+  - fix TODO's in code
+  - verify proper working of all functions (configuration ones)
+- get hardware to test
 
 #### Should
 
