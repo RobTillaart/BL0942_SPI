@@ -23,7 +23,7 @@ Note: this is work in progress, not functional complete yet.
 This library is to use the BL0942 energy monitor.
 The BL0942 is a configurable current and voltage sensor.
 This library only implements and supports the SPI interface.
-Therfor the SEL (protocol select) pin must be connected to HIGH (3.3V).
+Therefore the SEL (protocol select) pin must be connected to HIGH (3.3V).
 
 The device is a SPI slave, which works in half duplex mode,
 at a maximum clock rate of 900 kHz.
@@ -65,29 +65,28 @@ Note: use pull ups on the serial data / clock lines.
 
 From datasheet section 3.1:
 
-In three wire mode (miso, mosi, clock), A1 and A2_NCS must be connected to GND. 
+In three wire mode (MISO, MOSI, CLOCK), A1 and A2_NCS must be connected to GND.
 There can only be a single device on the SPI bus which is always selected.
 
-In four-wire mode (select, miso, mosi, clock), the A1 pin is connected to GND,
+In four-wire mode (SELECT, MICO, MOSI, CLOCK), the A1 pin is connected to GND,
 and the A2_NCS must be driven LOW for the read or write operation.
 
 If the A2 is held HIGH, the A2 bit in the COMMAND byte (write / read) is set HIGH,
 and the device won't recognize the 10101000 (=write) or 01011000 (=read) command.
-By pulling the A2_NCS LOW, that device will recognize the command and will 
+By pulling the A2_NCS LOW, that device will recognize the command and will
 response on the request, either read or write.
 
-In hardware the **select-pin** given in the constructor **MUST** be connected to 
+In hardware the **select-pin** given in the constructor **MUST** be connected to
 the **A2_NCS** pin of the devices to implement a proper select.
 Note this will ONLY work with the 14 pins BL0942.
 
 
-
 ### Calibration
 
-Call **calibrate(shunt, reductionFactor)** with shunt (typical = 0.001) and 
+Call **calibrate(shunt, reductionFactor)** with shunt (typical = 0.001) and
 the reduction factor of the voltage divider (e.g. 4000).
 
-The other calibration functions are to manually set the settings, optional adjust 
+The other calibration functions are to manually set the settings, optional adjust
 the values derived from **calibrate()** call.
 
 
@@ -117,7 +116,7 @@ Application notes
 
 ### Tested
 
-not
+extern
 
 
 ## Interface
@@ -128,15 +127,15 @@ not
 
 ### Constructor
 
-- **BL0942_SPI(__SPI_CLASS__ \* mySPI = &SPI)** hardware SPI without select pin.
-For single device or external channelSelector.
-- **BL0942_SPI(uint8_t select, __SPI_CLASS__ \* mySPI = &SPI)** hardware SPI 
-with select pin. For multiple devices.
+- **BL0942_SPI(__SPI_CLASS__ \* mySPI = &SPI)** hardware SPI without select pin for single device usage.
+- **BL0942_SPI(uint8_t select, __SPI_CLASS__ \* mySPI = &SPI)** hardware SPI
+with select pin. For multiple devices usage.
 - **BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)** software SPI.
 - **bool begin()** initializes internals.
 
-The select pin should be connected to the A2_NCS pin.
-When pulled LOW this device is selected.
+The select pin should be connected to the A2_NCS pin of the device.
+When this pin is pulled LOW this device is selected.
+Note you need one select pin per device.
 
 
 ### Calibration 1
@@ -186,6 +185,10 @@ the device more precise.
 - **uint32_t getCFPulseCount()** returns counter (base for energy)
 - **float getEnergy()** returns energy in kWh.
 - **float getFrequency()** returns frequency ~ 50 or 60 Hz.
+
+
+### Status
+
 - **uint16_t getStatus()** returns status byte mask.
 
 |  name                  |  value   |
@@ -196,70 +199,139 @@ the device more precise.
 |  BL0942_STAT_V_ZX_LTH  |  0x0200  |
 
 
-### Configuration
-
-Read datasheet for details.
-
-TODO
-- not tested
-- find their meaning / how these workor affect measurements.
-- elaborate API + code details
-
-#### RMS offset
+### RMS offset
 
 - **float getCurrentRMSOffset()**
-- **void setCurrentRMSOffset(float offset)**
+- **void setCurrentRMSOffset(float offset)**  TODO
 
-#### Power creep
+
+### Power creep
 
 - **float getPowerCreep()**
-- **void setPowerCreep(float creep)**
+- **void setPowerCreep(float watt)**
 
-#### Other
+Creep is define in Watt. It is the level that is considered noise.
+
+
+### Fast RMS threshold
 
 - **float getFastRMSThreshold()**
-- **void setFastRMSThreshold(float threshold)**
+- **void setFastRMSThreshold(float threshold)**  TODO
+
+
+### Fast RMS cycles
+
 - **uint8_t getFastRMSCycles()**
 - **void setFastRMSCycles(uint8_t cycles)** cycles = 0..7
+
+|  Value   |  Cycles  |  Notes  |
+|:---------|:--------:|:--------|
+|  0       |  0.5     |
+|  1       |  1       |
+|  2       |  2       |
+|  3       |  4       |
+|  4..7    |  8       |  values above 7 => 7
+
+
+### Frequency cycles
+
 - **uint8_t getFrequencyCycles()**
 - **void setFrequencyCycles(uint8_t cycles)** cycles = 0..2
 
-#### OutputConfig
+|  Value   |  Cycles  |  Notes  |
+|:---------|:--------:|:--------|
+|  0       |   2      |
+|  1       |   4      |
+|  2       |   8      |
+|  3       |  16      |  (values above 3 => 3)
+
+
+### Output configuration
 
 - **uint8_t getOutputConfigMask()**
 - **void setOutputConfigMask(uint8_t mask)** mask = 0..63
 
-TODO config register table
+Register 0x18
 
-#### UserMode
+|  Name                      |  Value  |  Notes  |
+|:---------------------------|:-------:|:--------|
+|  BL0942_CF1_ACTIVE_ENERGY  |   0x00  |  default
+|  BL0942_CF1_OVER_CURRENT   |   0x01  |
+|  BL0942_CF1_ZERO_CROSS_V   |   0x02  |
+|  BL0942_CF1_ZERO_CROSS_I   |   0x03  |
+|                            |         |
+|  BL0942_CF2_ACTIVE_ENERGY  |   0x00  |
+|  BL0942_CF2_OVER_CURRENT   |   0x04  |  default
+|  BL0942_CF2_ZERO_CROSS_V   |   0x08  |
+|  BL0942_CF2_ZERO_CROSS_I   |   0x0C  |
+|                            |         |
+|  BL0942_ZX_ACTIVE_ENERGY   |   0x00  |
+|  BL0942_ZX_OVER_CURRENT    |   0x10  |
+|  BL0942_ZX_ZERO_CROSS_V    |   0x20  |  default
+|  BL0942_ZX_ZERO_CROSS_I    |   0x30  |
+
+
+### UserMode
+
+See datasheet for details
 
 - **uint16_t getUserMode()**
 - **void setUserMode(uint16_t mode)**  mode = 0x0000 .. 0x03FF
 
-TODO mode register table
+Register 0x19
 
-#### Gain
+|  Name                            |  Value   |  Notes  |
+|:---------------------------------|:--------:|:--------|
+|  BL0942_MODE_CF_DISABLE          |  0x0000  |
+|  BL0942_MODE_CF_ENABLE           |  0x0004  |
+|  BL0942_MODE_RMS_UPDATE_400MS    |  0x0000  |
+|  BL0942_MODE_RMS_UPDATE_800MS    |  0x0008  |
+|  BL0942_MODE_RMS_WAVEFORM_FULL   |  0x0000  |
+|  BL0942_MODE_RMS_WAVEFORM_AC     |  0x0010  |
+|  BL0942_MODE_AC_FREQUENCY_50HZ   |  0x0000  |
+|  BL0942_MODE_AC_FREQUENCY_60HZ   |  0x0020  |
+|  BL0942_MODE_CNT_CLR_SEL_DISABLE |  0x0000  |
+|  BL0942_MODE_CNT_CLR_SEL_ENABLE  |  0x0040  |
+|  BL0942_MODE_ACCU_MODE_ALGEBRAIC |  0x0000  |
+|  BL0942_MODE_ACCU_MODE_ABSOLUTE  |  0x0080  |
+|  BL0942_MODE_UART_4800           |  0x0000  |
+|  BL0942_MODE_UART_9600           |  0x0100  |
+|  BL0942_MODE_UART_19200          |  0x0200  |
+|  BL0942_MODE_UART_38400          |  0x0300  |
+
+
+### Gain
 
 - **uint8_t getCurrentGain()**
 - **void setCurrentGain(uint8_t gain)**
 
-|  name            |  value  |  gain  |
-|:-----------------|:-------:|:-------|
+Register 0x1A
+
+|  Name            |  Value  |  Gain  |  Notes  |
+|:-----------------|:-------:|:------:|:--------|
 |  BL0942_GAIN_1   |   0x00  |    1   |
 |  BL0942_GAIN_4   |   0x01  |    4   |
 |  BL0942_GAIN_16  |   0x02  |   16   |
 |  BL0942_GAIN_24  |   0x03  |   24   |
 
 
-### Miscelaneous
+### Reset
 
 Read datasheet for details.
 
-TODO elaborate
-
 - **void softReset()**
-- **uint8_t getWriteProtect()**
-- **void setWriteProtect()**
+
+
+### Write protect
+
+Read datasheet for details.
+
+TODO this way or reverse?
+
+- **uint8_t getWriteProtect()** returns current write protect status.
+- **void setWriteProtect(bool wp)**
+  - wp = true => write protected  
+  - wp = false => write allowed  
 
 
 ### SPI
@@ -279,7 +351,7 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 
 - **uint8_t getLastError()** returns last error of low level communication.
 
-|  value  |  error                 |  notes  |
+|  Value  |  Error                 |  Notes  |
 |:-------:|:-----------------------|:--------|
 |     0   |  BL0942_OK             |
 |    -1   |  BL0942_ERR_WRITE      |  not used
@@ -287,18 +359,22 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 |    -3   |  BL0942_ERR_CHECKSUM   |
 
 
+----
+
+## Derived Class OKNX_BL0942_SPI
+
+Created on request for Open KNX project.
+
 ### Channel selector
 
 TODO elaborate
 
-```cpp
-typedef void (*channelSelector)(bool active);
-```
+Works with dependency injection
 
-- **void setChannelSelector(channelSelector selector)**
+- **void setChannelSelector(SwitchActuatorChannel \* sac)**
 - **void ensure_channel_selected(bool active)**
 
-See example.
+See example OKNX_BL0942_SPI_test.ino (simulates the OKNX a bit).
 
 
 ## Future
@@ -309,22 +385,25 @@ See example.
 - verify proper working of all functions (configuration ones)
 - improve documentation
 - get hardware to test test and test
-
+- fix TODO's in documentation and code
 
 #### Should
 
 - investigate multi device
+  - write a section  
   - SELECT pin for SPI
   - multi device => AND gate with clock pin
-  - multiplexer?
-- add examples
-- improve error handling
-- investigate unit tests
+  - multiplexer? - https://github.com/RobTillaart/HC4067  (1x16 mux)
+    needs only 4 lines for 16 devices.
 - **resetSPI()** function?  section 3.1.3
--
+- software SPI force under SPI max speed 
+  - depending on performance / hard delayMicroseconds() for now.
 
 #### Could
 
+- add examples
+- improve error handling
+- investigate unit tests
 
 #### Wont
 

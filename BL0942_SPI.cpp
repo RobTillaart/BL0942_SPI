@@ -35,12 +35,11 @@
 #define BL0942_REG_SOFT_RESET               0x1C      //  24     RW
 #define BL0942_REG_USR_WRPROT               0x1D      //   8     RW
 
-
-//  datasheet page 9. BL0942_REG_MODE
-
-//  TODO
-
-
+//
+//  SPI MAX SPEED
+//  datasheet states 900 kHz
+//
+#define BL0942_SPI_MAX_SPEED        (900000)
 
 
 //
@@ -91,7 +90,7 @@ bool BL0942_SPI::begin()
   pinMode(_select, OUTPUT);
   digitalWrite(_select, HIGH);  //  HIGH == NOT selected.
 
-  setSPIspeed(900000);
+  setSPIspeed(BL0942_SPI_MAX_SPEED);
 
   if(_hwSPI)
   {
@@ -414,7 +413,7 @@ void BL0942_SPI::setSPIspeed(uint32_t speed)
   //  datasheet page 20, section 3.1
   //  900 KHz max datasheet
   _SPIspeed = speed;
-  if (_SPIspeed > 900000) _SPIspeed = 900000;
+  if (_SPIspeed > BL0942_SPI_MAX_SPEED) _SPIspeed = BL0942_SPI_MAX_SPEED;
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 }
 
@@ -564,7 +563,7 @@ uint8_t BL0942_SPI::swSPI_transfer(uint8_t val)
     {
       value |= mask;
     }
-    //  force below 900.000 Hz rate (TODO add define, configurable)
+    //  force below 900.000 Hz rate (hard coded for now).
     delayMicroseconds(1);
   }
   return value;
