@@ -18,6 +18,9 @@
 #include "Arduino.h"
 #include "SPI.h"
 
+#ifdef BL0942_SPI_CALLBACK
+#include <functional>
+#endif
 
 #define BL0942_SPI_LIB_VERSION         (F("0.1.0"))
 
@@ -115,6 +118,11 @@ public:
   BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock);
 
   bool     begin();
+
+#ifdef BL0942_SPI_CALLBACK
+  using ChannelSelector = std::function<void(bool active)>;
+  void setChannelSelector(ChannelSelector selector);
+#endif
 
   //  CALIBRATION
   void     calibrate(float shunt, float reductionFactor = 1.0f);
@@ -248,47 +256,12 @@ protected:
   // uint32_t readRegister(uint8_t regAddr);
   uint8_t  swSPI_transfer(uint8_t val);
 
-};
+  void ensureChannelSelected(bool active);
 
-
-//////////////////////////////////////////////////////////////////////
-//
-//  DERIVED CLASS FOR OPEN KNX
-//  Andreas B.
-//
-#ifdef OPENKNX_SWA_BL0942_SPI
-
-class OKNX_BL0942_SPI : public BL0942_SPI
-{
-public:
-  //  HW SPI
-  OKNX_BL0942_SPI(__SPI_CLASS__ * mySPI = &SPI) 
-      : BL0942_SPI(mySPI)
-  {};
-  OKNX_BL0942_SPI(uint8_t select, __SPI_CLASS__ * mySPI = &SPI) 
-      : BL0942_SPI(select, mySPI)
-  {};
-  //  SW SPI
-  OKNX_BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)
-      : BL0942_SPI(select, dataIn, dataOut, clock)
-  {};
-
-
-  void setChannelSelector(SwitchActuatorChannel * sac)
-  {
-     _sac = sac;
-  }
-
-  void ensure_channel_selected(bool active)
-  {
-    if (_sac) _sac->bl0942ChannelSelector(active);
-    else digitalWrite(_select, active ? LOW : HIGH);
-  }
-
-  SwitchActuatorChannel * _sac;
-};
-
+#ifdef BL0942_SPI_CALLBACK
+  ChannelSelector _channelSelector = nullptr;
 #endif
+};
 
 
 //  -- END OF FILE --
