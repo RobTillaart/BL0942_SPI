@@ -11,31 +11,43 @@
 
 # BL0942_SPI
 
-Arduino library for BL0942 energy monitor, SPI interface.
+Arduino library for BL0942 energy monitor, SPI interface only.
 
 
 ## Description
 
 **Experimental - Work in progress**
 
-This Arduino library is to use the BL0942 energy monitor.
+This Arduino library is to use the BL0942 energy monitor 
+over the SPI interface.
 The BL0942 is a configurable current and voltage sensor. 
 It also provides power and energy usage.
 
 The library was requested by Andreas Breitschopp, as alternative for 
-the UART library for the BL0942. 
-Andreas co-developed part of the code and did most of the testing
+the UART library for the BL0942. See related below.
+Besides the SPI interface the request also included a callback function
+to be used in the Open KNX environment. 
+Andreas co-developed and did the testing with hardware 
 
 This library only implements and supports the SPI interface.
-Therefore the SEL (protocol select) pin must be connected to HIGH (3.3V).
+To use the SPI interface, the SEL (protocol select) pin of the PL0942 
+must be connected to HIGH (3.3V).
 
-The device is a SPI slave, which works in half duplex mode,
-at a maximum clock rate of 900 kHz.
-It is not tested if it works well beyond that speed.
+The device acts as a SPI slave, which works in half duplex mode,
+at a maximum clock rate of 900 kHz. This is a rather low speed and
+it is not tested yet if the device works well beyond that speed.
+The expectation is that there is not much gain possible.
+
+The device contains a ChipSelect pin (A2_NCS) so it is possible to use
+multiple devices. The library implements three constructors, one without
+a select pin (single device) one with select pin and a software SPI 
+constructor.
+
+Always read the datasheet for the details.
 
 The library is still under test / development with hardware, so use with care.
 
-Feedback as always is welcome.
+Feedback as always is welcome. Please open an issue on GitHub.
 
 
 ### Hardware 2 models
@@ -67,6 +79,8 @@ There are two different BL0942 modules, one with 10 pins, and one with
 Note: use pull ups on the serial data / clock lines.
 
 
+### Multi device
+
 From datasheet section 3.1:
 
 In three wire mode (MISO, MOSI, CLOCK), A1 and A2_NCS must be connected to GND.
@@ -80,9 +94,18 @@ and the device won't recognize the 10101000 (=write) or 01011000 (=read) command
 By pulling the A2_NCS LOW, that device will recognize the command and will
 response on the request, either read or write.
 
-In hardware the **select-pin** given in the constructor **MUST** be connected to
-the **A2_NCS** pin of the devices to implement a proper select.
-Note this will ONLY work with the 14 pins BL0942.
+In hardware the **select pin** given in the constructor **MUST** be connected to
+the **A2_NCS** pin of the devices to implement a proper device select.
+
+Note multi device will ONLY work with the 14 pins BL0942.
+
+Technically it is possible to implement multiplexing with additional hardware 
+on the 10 pins devices. E.g. one could use an AND port on the clock input of the 
+device. THe inputs of the AND port are the CLOCK pin and an inverted SELECT pin.
+(inverted as the library pulls select LOW to select).
+
+Other multiplex solutions might exist (e.g. multiplexer HC4067) but for now 
+these are out of the scope of this library.
 
 
 ### Calibration
@@ -100,19 +123,41 @@ _Do not apply this product to safety protection devices or emergency stop equipm
 and any other applications that may cause personal injury due to the product's failure._
 
 
-### BL0940
+### Compatibles
 
 The BL0940 is not compatible, although its internal working is partial similar.
 At least it needs other magic numbers, and has some other registers.
 Support for the BL0940 is not planned.
+
+BL0937 idem.
+
+
+## Performance
+
+The device works at maximum 900 kHz which is rather low. NO tests have been done
+at higher speeds. 
+
+As all communication involves sending / receiving 6 bytes (48 bit) the calls to
+the device are expected to be very similar in time.
+48 bits at 900 kHz implies a minimum of 54 microseconds for the transmission of
+the bits. 
+
+Indicative figures (in microseconds per call)
+
+|  SPI  |  Function     |  UNO R3  |  ESP32  |  RP2040  |
+|:-----:|:-------------:|:--------:|:-------:|:--------:|
+|   HW  |  Calibrate    |    4     |         |          |
+|   HW  |  RW register  |   116    |         |          |
+|   SW  |  Calibrate    |    4     |         |          |
+|   SW  |  RW register  |   924    |         |          |
 
 
 ### Related
 
 - https://www.belling.com.cn/product_info.html?id=753  latest datasheet
 - https://github.com/RobTillaart/BL0942 this library
-- https://github.com/RobTillaart/INA226 I2C current and voltage sensor (one of many)
-- https://github.com/RobTillaart/printHelpers exponential notation floats
+- https://github.com/RobTillaart/INA226 I2C current and voltage sensor (one of many INAxxx)
+- https://github.com/RobTillaart/printHelpers for exponential notation floats.
 
 
 UART library for the BL0942
@@ -121,6 +166,11 @@ UART library for the BL0942
 
 Application notes
 - https://www.belling.com.cn/media/file_object/bel_product/BL0942/guide/BL0942%20APP%20Note_V1.04_cn.pdf
+
+
+### Ohm sign
+
+Alt-234 = Ω (Ohm sign) (Windows).
 
 
 ### Tested
@@ -136,15 +186,21 @@ In progress.
 
 ### Constructor
 
-- **BL0942_SPI(__SPI_CLASS__ \* mySPI = &SPI)** hardware SPI without select pin for single device usage.
+- **BL0942_SPI(__SPI_CLASS__ \* mySPI = &SPI)** hardware SPI without select 
+pin for single device usage.
 - **BL0942_SPI(uint8_t select, __SPI_CLASS__ \* mySPI = &SPI)** hardware SPI
 with select pin. For multiple devices usage.
-- **BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)** software SPI.
+- **BL0942_SPI(uint8_t select, uint8_t dataIn, uint8_t dataOut, uint8_t clock)** 
+software SPI with select pin. 
+For single device usage one can set the select pin to 255.
 - **bool begin()** initializes internals.
 
-The select pin should be connected to the A2_NCS pin of the device.
+The select pin should be connected to the A2_NCS pin of the device (14 pins model).
 When this pin is pulled LOW this device is selected.
-Note you need one select pin per device.
+
+Note you typical need one select pin per device. Although other hardware
+configurations are possible (e.g. HC4067 multiplexer) these are not
+supported by the library.
 
 
 ### Calibration 1
@@ -154,24 +210,32 @@ calibration of the current measurement based upon the shunt and the
 calibration of the voltage based upon the reduction factor (ration)
 of an optional voltage divider.
 
-Typical values for shunt are in the range 0.001 - 1 Ohm.
+From APP Note BL940: (assumes this math applies to all shunts).
+
+_The shunt size(1mΩ) is selected to maximize the use of the dynamic range on
+current channel. However, there are some import considerations when selecting a shunt
+for an energy metering application. First, minimize the power dissipation in the shunt. the
+maximum rated current can be 35A,therefore the maximum power dissipated in the shunt
+is 35A×35A×1mΩ=1.225W. Secondly, the higher power dissipation may make it difficult
+to manage the thermal issues. High temperatures may cause significant error at heavy
+loads. **So, the maximum rated current@ (1mΩ shunt) should be limited to 16A.**_
+
 
 Reduction factor of an ```VDD - R1 - R2 - GND``` ladder:
 ```
-RF = (R1 + R2) / R2;  // e.g. R1=20K R2=100 => RF=20100/100=201.
+RF = (R1 + R2) / R2;  // e.g. R1=200K R2=100 => RF=200100/100 = 2001.
 ```
 
-Note the max current is 30A although one should keep the current under 15A.
-The power dissipated by the shunt can be calculated:
-```
-P = 25 * 35 * shunt;
-```
 
 ### Calibration 2
 
 The following functions set the values per LSB directly for the core measurements registers.
 The getter functions allow (run time) adjustments and help to manually calibrate
-the device more precise.
+the device more precise if needed.
+
+The VoltageLSB is the voltage of the LeastSignificantBit, the value one has to 
+multiply the raw register value with. Other LSB's idem.
+Note: the LSB numbers are the reciprocal of the numbers configured in the UART library.
 
 - **float getVoltageLSB()**
 - **void setVoltageLSB(float voltageLSB)**
@@ -190,13 +254,15 @@ the device more precise.
 - **float getIRMS()** return RMS current in Amperes.
 - **float getVRMS()** return RMS voltage in Volts.
 - **float getIRMSFast()** returns RMS current (faster less exact) in Amperes.
-- **float getWatt()** returns power Watt
-- **uint32_t getCFPulseCount()** returns counter (base for energy)
+- **float getWatt()** returns power Watt.
+- **uint32_t getCFPulseCount()** returns counter (base for energy).
 - **float getEnergy()** returns energy in kWh.
 - **float getFrequency()** returns frequency ~ 50 or 60 Hz.
 
 
 ### Status
+
+Read datasheet for details.
 
 - **uint16_t getStatus()** returns status byte mask.
 
@@ -219,7 +285,8 @@ the device more precise.
 - **float getPowerCreep()**
 - **void setPowerCreep(float watt)**
 
-Creep is define in Watt. It is the level that is considered noise.
+Creep is defined in Watt. It is the level that is considered noise,
+and will not be accounted for as Power and Energy.
 
 
 ### Fast RMS threshold
@@ -234,12 +301,13 @@ Creep is define in Watt. It is the level that is considered noise.
 - **void setFastRMSCycles(uint8_t cycles)** cycles = 0..7
 
 |  Value   |  Cycles  |  Notes  |
-|:---------|:--------:|:--------|
+|:--------:|:--------:|:--------|
 |  0       |  0.5     |
-|  1       |  1       |
+|  1       |  1       |  default
 |  2       |  2       |
 |  3       |  4       |
-|  4..7    |  8       |  values above 7 => 7
+|  4..7    |  8       |
+|   > 7    |  8       |  values above 7 => 7
 
 
 ### Frequency cycles
@@ -247,12 +315,13 @@ Creep is define in Watt. It is the level that is considered noise.
 - **uint8_t getFrequencyCycles()**
 - **void setFrequencyCycles(uint8_t cycles)** cycles = 0..2
 
-|  Value   |  Cycles  |  Notes  |
-|:---------|:--------:|:--------|
-|  0       |   2      |
-|  1       |   4      |
-|  2       |   8      |
-|  3       |  16      |  (values above 3 => 3)
+|  Value  |  Cycles  |  Notes  |
+|:-------:|:--------:|:--------|
+|  0      |   2      |
+|  1      |   4      |
+|  2      |   8      |
+|  3      |  16      |  default
+|  > 3    |  16      |  values above 3 => 3
 
 
 ### Output configuration
@@ -260,7 +329,7 @@ Creep is define in Watt. It is the level that is considered noise.
 - **uint8_t getOutputConfigMask()**
 - **void setOutputConfigMask(uint8_t mask)** mask = 0..63
 
-Register 0x18
+Register 0x18, mask values should be OR-ed.
 
 |  Name                      |  Value  |  Notes  |
 |:---------------------------|:-------:|:--------|
@@ -285,14 +354,14 @@ Register 0x18
 See datasheet for details
 
 - **uint16_t getUserMode()**
-- **void setUserMode(uint16_t mode)**  mode = 0x0000 .. 0x03FF
+- **void setUserMode(uint16_t mode)** mode = 0x0000 .. 0x03FF (default 0x087)
 
-Register 0x19
+Register 0x19, mask values should be OR-ed.
 
 |  Name                            |  Value   |  Notes  |
 |:---------------------------------|:--------:|:--------|
 |  BL0942_MODE_CF_DISABLE          |  0x0000  |
-|  BL0942_MODE_CF_ENABLE           |  0x0004  |
+|  BL0942_MODE_CF_ENABLE           |  0x0004  |  default
 |  BL0942_MODE_RMS_UPDATE_400MS    |  0x0000  |
 |  BL0942_MODE_RMS_UPDATE_800MS    |  0x0008  |
 |  BL0942_MODE_RMS_WAVEFORM_FULL   |  0x0000  |
@@ -302,11 +371,15 @@ Register 0x19
 |  BL0942_MODE_CNT_CLR_SEL_DISABLE |  0x0000  |
 |  BL0942_MODE_CNT_CLR_SEL_ENABLE  |  0x0040  |
 |  BL0942_MODE_ACCU_MODE_ALGEBRAIC |  0x0000  |
-|  BL0942_MODE_ACCU_MODE_ABSOLUTE  |  0x0080  |
+|  BL0942_MODE_ACCU_MODE_ABSOLUTE  |  0x0080  |  default
 |  BL0942_MODE_UART_4800           |  0x0000  |
 |  BL0942_MODE_UART_9600           |  0x0100  |
 |  BL0942_MODE_UART_19200          |  0x0200  |
 |  BL0942_MODE_UART_38400          |  0x0300  |
+
+Note: The UART settings are not to be used in this SPI library.
+
+Note: bits 0,1 are reserved and default 1. bits 23-10 are default 0.
 
 
 ### Gain
@@ -339,8 +412,8 @@ TODO this way or reverse?
 
 - **uint8_t getWriteProtect()** returns current write protect status.
 - **void setWriteProtect(bool wp)**
-  - wp = true => write protected  
-  - wp = false => write allowed  
+  - wp = true => write protected
+  - wp = false => write allowed
 
 
 ### SPI
@@ -353,7 +426,8 @@ Has no effect on software SPI.
 - **bool usesHWSPI()** returns true / false depending on constructor.
 
 _3.1.3 Fault Tolerant Mechanism of SPI Interface
-If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI communication interface. => **resetSPI()**_
+If MCU send 6 bytes (0xFF), the BL0942 perform a reset function 
+on the SPI communication interface. => **resetSPI()** (not implemented)_
 
 
 ### Error
@@ -373,7 +447,6 @@ If MCU send 6 bytes (0xFF), the BL0942 perform a reset function on the SPI commu
 ## Open KNX extra API
 
 Created on request for Open KNX project.
-For documentation see OKNX.
 
 - **void setChannelSelector(ChannelSelector selector)**
 To set the channel selector call back function.
@@ -389,24 +462,22 @@ To set the channel selector call back function.
   - fix TODO's in code
   - verify proper working of all functions (configuration ones)
 - get hardware to test
+- test software SPI communication.
 
 #### Should
 
-- investigate multi device
-  - write a section  
-  - SELECT pin for SPI
-  - multi device => AND gate with clock pin
-  - multiplexer? - https://github.com/RobTillaart/HC4067  (1x16 mux)
-    needs only 4 lines for 16 devices.
 - **resetSPI()** function?  section 3.1.3
 - software SPI force under SPI max speed 
   - depending on performance / hard delayMicroseconds() for now.
+  - make it configurable? 
+- performance measurements
 
 #### Could
 
 - add examples
 - improve error handling
 - investigate unit tests
+- default parameters for simple reset?
 
 #### Wont
 
