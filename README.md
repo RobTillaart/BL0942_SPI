@@ -65,7 +65,7 @@ There are two different BL0942 modules, one with 10 pins, and one with
 |     IN    |     3    |     3    |  current channel
 |     VP    |     4    |     4    |  voltage channel
 |    GND    |     5    |     5    |  ground
-|    CF1    |     6    |     6    |  output 1
+|    CF1    |     6    |     6    |  output 1 (pulse output)
 |    SEL    |     7    |    11    |  LOW = UART  HIGH = SPI
 |  CLK/BAUD |     8    |    12    |  SPI clock / BAUD select
 |   RX/SDI  |     9    |    13    |  serial data in
@@ -73,8 +73,8 @@ There are two different BL0942 modules, one with 10 pins, and one with
 |           |          |          |
 |    A1     |          |     6    |  address pin, GND in SPI
 |  A2_NCS   |          |     7    |  address pin, SELECT in SPI
-|   CF2     |          |     8    |  output 2
-|    ZX     |          |     9    |  zero crossing
+|   CF2     |          |     8    |  output 2 (pulse output)
+|    ZX     |          |     9    |  zero crossing (pulse output)
 
 Note: use pull ups on the serial data / clock lines.
 
@@ -276,8 +276,8 @@ Read datasheet for details.
 
 ### RMS offset
 
-- **float getCurrentRMSOffset()**
-- **void setCurrentRMSOffset(float offset)**  TODO
+- **float getCurrentRMSOffset()** returns set offset.
+- **void setCurrentRMSOffset(float offset)** set offset in Amperes.
 
 
 ### Power creep
@@ -325,6 +325,8 @@ and will not be accounted for as Power and Energy.
 
 
 ### Output configuration
+
+To set the (pulsed) output of the CF1, CF2 and the ZX pins.
 
 - **uint8_t getOutputConfigMask()**
 - **void setOutputConfigMask(uint8_t mask)** mask = 0..63

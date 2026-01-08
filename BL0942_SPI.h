@@ -3,7 +3,7 @@
 //    FILE: BL0942_SPI.h
 //  AUTHOR: Rob Tillaart
 //    DATE: 2025-12-29
-// VERSION: 0.1.0
+// VERSION: 0.1.1
 // PURPOSE: Arduino library for BL0942 energy monitor, SPI interface.
 //     URL: https://github.com/RobTillaart/BL0942_SPI
 //
@@ -25,7 +25,7 @@
 #endif
 
 
-#define BL0942_SPI_LIB_VERSION         (F("0.1.0"))
+#define BL0942_SPI_LIB_VERSION         (F("0.1.1"))
 
 #ifndef __SPI_CLASS__
   //  MBED must be tested before RP2040
@@ -157,7 +157,7 @@ public:
 
 
   //  READ WRITE registers
-  //  TODO offset = ??  units?
+  //  offset in Amperes.
   float    getCurrentRMSOffset();
   void     setCurrentRMSOffset(float offset);
 
@@ -167,7 +167,7 @@ public:
   void     setPowerCreep(float watt);
 
 
-  //  TODO threshold = Ampere
+  //  threshold in Amperes (?)
   //  If I_FAST_RMS[23:8] >= I_FAST_RMS_TH[15:0] ==> flag
   //  ???  only 16 upper bits compared to 16 bit value
   //  ==> there must be a factor 256 somewhere.

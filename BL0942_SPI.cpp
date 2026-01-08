@@ -58,12 +58,14 @@ const float BL0942_MAGIC_POWER   = 3537000000;
 //
 BL0942_SPI::BL0942_SPI(__SPI_CLASS__ * mySPI)
 {
+  //  255 is not used on any known board.
   BL0942_SPI(255, mySPI);
 }
 
 BL0942_SPI::BL0942_SPI(uint8_t select, __SPI_CLASS__ * mySPI)
 {
   _select   = select;
+  //  255 is not used on any known board.
   _dataIn   = 255;
   _dataOut  = 255;
   _clock    = 255;
@@ -132,7 +134,7 @@ void BL0942_SPI::calibrate(float shunt, float reductionFactor)
   _powerLSB  /= (BL0942_MAGIC_POWER * shunt);
 
   //  optimized formula
-  _energyLSB  = (1638.4 * 256 / 3600000) * _powerLSB;
+  _energyLSB  = ((1638.4 * 256) / 3600000) * _powerLSB;
 }
 
 float BL0942_SPI::getVoltageLSB()
@@ -189,7 +191,6 @@ float BL0942_SPI::getIWave()
   int32_t raw = readRegister(BL0942_REG_I_WAVE);
   //  extend sign bit
   if (raw & 0x00040000) raw |= 0xFFF0000;
-  //  TODO formula units?
   return raw * _currentLSB;
 }
 
@@ -270,14 +271,14 @@ uint16_t BL0942_SPI::getStatus()
 float BL0942_SPI::getCurrentRMSOffset()
 {
   int32_t raw = readRegister(BL0942_REG_I_RMSOS);
-  //  TODO formula units?
-  //  _currentLSB  ?
-  return raw;
+  //  verify formula units
+  return raw * _currentLSB;
 }
 
 void BL0942_SPI::setCurrentRMSOffset(float offset)
 {
-  uint8_t raw = offset;  //  _currentLSB  ?
+  //  verify formula units
+  uint8_t raw = offset / _currentLSB;
   writeRegister(BL0942_REG_I_RMSOS, raw);
 }
 
@@ -301,14 +302,14 @@ void BL0942_SPI::setPowerCreep(float watt)
 float BL0942_SPI::getFastRMSThreshold()
 {
   uint16_t raw = readRegister(BL0942_REG_I_FAST_RMS_TH);
-  //  TODO formula units?
-  //  raw * _currentLSB * 256;
-  return raw;
+  //  verify formula units
+  return raw * _currentLSB * 256;
 }
 
 void BL0942_SPI::setFastRMSThreshold(float threshold)
 {
-  uint16_t raw = threshold;
+  //  verify formula units
+  uint16_t raw = threshold / (_currentLSB * 256);
   writeRegister(BL0942_REG_I_FAST_RMS_TH, raw);
 }
 
