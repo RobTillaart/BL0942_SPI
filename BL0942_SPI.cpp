@@ -191,7 +191,7 @@ float BL0942_SPI::getIWave()
   int32_t raw = readRegister(BL0942_REG_I_WAVE);
   raw &= 0xFFFFF;
   //  extend sign bit
-  if (raw & 0x00040000) raw |= 0xFFF0000;
+  if (raw & 0x00080000) raw |= 0xFFF0000;
   return raw * _currentLSB;
 }
 
@@ -200,7 +200,7 @@ float BL0942_SPI::getVWave()
   int32_t raw = readRegister(BL0942_REG_V_WAVE);
   raw &= 0xFFFFF;
   //  extend sign bit
-  if (raw & 0x00040000) raw |= 0xFFF0000;
+  if (raw & 0x00080000) raw |= 0xFFF0000;
   return raw * _voltageLSB;
 }
 
@@ -379,7 +379,7 @@ void BL0942_SPI::setOutputConfigMask(uint8_t mask)
 uint16_t BL0942_SPI::getUserMode()
 {
   uint16_t raw = readRegister(BL0942_REG_MODE);
-  raw &= 0x03FF;
+  raw &= 0x03FC;
   return raw;
 }
 
