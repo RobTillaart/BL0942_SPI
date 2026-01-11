@@ -353,7 +353,10 @@ Register 0x18, mask values should be OR-ed.
 
 ### UserMode
 
-See datasheet for details
+See datasheet for details.
+
+To be able to write to the UserMode register, one must call **setWriteProtect(false)**.
+See below.
 
 - **uint16_t getUserMode()**
 - **void setUserMode(uint16_t mode)** mode = 0x0000 .. 0x03FF (default 0x087)
@@ -409,8 +412,6 @@ Read datasheet for details.
 ### Write protect
 
 Read datasheet for details.
-
-TODO this way or reverse?
 
 - **uint8_t getWriteProtect()** returns current write protect status.
 - **void setWriteProtect(bool wp)**

@@ -214,7 +214,6 @@ public:
 
   void     softReset();
 
-  //  TODO this way or inverse?
   //  true  = write protected
   //  false = write allowed
   uint8_t  getWriteProtect();

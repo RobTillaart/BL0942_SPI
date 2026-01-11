@@ -2,7 +2,7 @@
 //    FILE: BL0942_SPI.cpp
 //  AUTHOR: Rob Tillaart
 //    DATE: 2025-12-29
-// VERSION: 0.1.0
+// VERSION: 0.1.1
 // PURPOSE: Arduino library for BL0942 energy monitor, SPI interface.
 //     URL: https://github.com/RobTillaart/BL0942_SPI
 
@@ -370,6 +370,7 @@ void BL0942_SPI::setUserMode(uint16_t mode)
   uint16_t raw = mode;
   //  limit to 10 bits
   raw &= 0x03FF;
+  raw |= 0x0003;  //  force bits 0,1 to b1
   writeRegister(BL0942_REG_MODE, raw);
 }
 
