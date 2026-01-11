@@ -189,6 +189,7 @@ void BL0942_SPI::setEnergyLSB(float energyLSB)
 float BL0942_SPI::getIWave()
 {
   int32_t raw = readRegister(BL0942_REG_I_WAVE);
+  raw &= 0xFFFFF;
   //  extend sign bit
   if (raw & 0x00040000) raw |= 0xFFF0000;
   return raw * _currentLSB;
@@ -197,6 +198,7 @@ float BL0942_SPI::getIWave()
 float BL0942_SPI::getVWave()
 {
   int32_t raw = readRegister(BL0942_REG_V_WAVE);
+  raw &= 0xFFFFF;
   //  extend sign bit
   if (raw & 0x00040000) raw |= 0xFFF0000;
   return raw * _voltageLSB;
@@ -206,6 +208,7 @@ float BL0942_SPI::getIRMS()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_I_RMS);
+  raw &= 0xFFFFFF;
   return raw * _currentLSB;
 }
 
@@ -213,6 +216,7 @@ float BL0942_SPI::getVRMS()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_V_RMS);
+  raw &= 0xFFFFFF;
   //  RMS factor?
   return raw * _voltageLSB;
 }
@@ -221,6 +225,7 @@ float BL0942_SPI::getIRMSFast()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
+  raw &= 0xFFFFFF;
   //  RMS factor?
   return raw * _currentLSB;
 }
@@ -228,6 +233,7 @@ float BL0942_SPI::getIRMSFast()
 float BL0942_SPI::getWatt()
 {
   int32_t raw = readRegister(BL0942_REG_WATT);
+  raw &= 0xFFFFFF;
   //  extend sign bit
   if (raw & 0x00800000) raw |= 0xFF00000;
   return raw * _powerLSB;
@@ -237,6 +243,7 @@ uint32_t BL0942_SPI::getCFPulseCount()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_CF_CNT);
+  raw &= 0xFFFFFF;
   return raw;
 }
 
@@ -244,6 +251,7 @@ float BL0942_SPI::getEnergy()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_CF_CNT);
+  raw &= 0xFFFFFF;
   return raw * _energyLSB;
 }
 
@@ -251,6 +259,7 @@ float BL0942_SPI::getFrequency()
 {
   //  unsigned
   uint32_t raw = readRegister(BL0942_REG_FREQ);
+  raw &= 0xFFFF;
   //  page 19 formula  default 20000 == 50 Hz
   return 1e6 / raw;
 }
@@ -260,7 +269,8 @@ float BL0942_SPI::getFrequency()
 uint16_t BL0942_SPI::getStatus()
 {
   uint32_t raw = readRegister(BL0942_REG_STATUS);
-  return raw & 0x03FF;
+  uint16_t status = raw & 0x03FF;
+  return status;
 }
 
 
@@ -271,6 +281,7 @@ uint16_t BL0942_SPI::getStatus()
 float BL0942_SPI::getCurrentRMSOffset()
 {
   int32_t raw = readRegister(BL0942_REG_I_RMSOS);
+  raw &= 0xFF;
   //  verify formula units
   return raw * _currentLSB;
 }
@@ -285,6 +296,7 @@ void BL0942_SPI::setCurrentRMSOffset(float offset)
 float BL0942_SPI::getPowerCreep()
 {
   int32_t raw = readRegister(BL0942_REG_WA_CREEP);
+  raw &= 0xFF;
   float watt = raw * (3125.0/256.0);
   return watt;
 }
@@ -302,6 +314,7 @@ void BL0942_SPI::setPowerCreep(float watt)
 float BL0942_SPI::getFastRMSThreshold()
 {
   uint16_t raw = readRegister(BL0942_REG_I_FAST_RMS_TH);
+  raw &= 0xFFFF;
   //  verify formula units
   return raw * _currentLSB * 256;
 }
@@ -317,6 +330,7 @@ void BL0942_SPI::setFastRMSThreshold(float threshold)
 uint8_t BL0942_SPI::getFastRMSCycles()
 {
   uint8_t raw = readRegister(BL0942_REG_I_FAST_RMS_CYC);
+  raw &= 0x07;
   return raw;
 }
 
@@ -336,6 +350,7 @@ void BL0942_SPI::setFastRMSCycles(uint8_t cycles)
 uint8_t BL0942_SPI::getFrequencyCycles()
 {
   uint8_t raw = readRegister(BL0942_REG_FREQ_CYC);
+  raw &= 0x03;
   return raw;
 }
 
@@ -349,19 +364,22 @@ void BL0942_SPI::setFrequencyCycles(uint8_t cycles)
 uint8_t BL0942_SPI::getOutputConfigMask()
 {
   uint8_t raw = readRegister(BL0942_REG_OT_FUNX);
+  raw &= 0x3F;
   return raw;
 }
 
 void BL0942_SPI::setOutputConfigMask(uint8_t mask)
 {
   uint8_t raw = mask;
-  if (raw > 63) raw = 63;
+  //  what values are OK? easy to test?
+  if (raw > 0x3F) raw = 0x3F;
   writeRegister(BL0942_REG_OT_FUNX, raw);
 }
 
 uint16_t BL0942_SPI::getUserMode()
 {
   uint16_t raw = readRegister(BL0942_REG_MODE);
+  raw &= 0x03FF;
   return raw;
 }
 
@@ -370,20 +388,22 @@ void BL0942_SPI::setUserMode(uint16_t mode)
   uint16_t raw = mode;
   //  limit to 10 bits
   raw &= 0x03FF;
-  raw |= 0x0003;  //  force bits 0,1 to b1
+  //  force bits 0,1 to b1
+  raw |= 0x0003;
   writeRegister(BL0942_REG_MODE, raw);
 }
 
 uint8_t BL0942_SPI::getCurrentGain()
 {
   uint8_t raw = readRegister(BL0942_REG_GAIN_CR);
+  raw &= 0x03;
   return raw;
 }
 
 void BL0942_SPI::setCurrentGain(uint8_t gain)
 {
   uint8_t raw = gain;
-  if (raw > 3) raw = 3;
+  if (raw > 0x03) raw = 0x03;
   writeRegister(BL0942_REG_GAIN_CR, raw);
 }
 
@@ -415,7 +435,10 @@ void BL0942_SPI::setSPIspeed(uint32_t speed)
   //  datasheet page 20, section 3.1
   //  900 KHz max datasheet
   _SPIspeed = speed;
-  if (_SPIspeed > BL0942_SPI_MAX_SPEED) _SPIspeed = BL0942_SPI_MAX_SPEED;
+  if (_SPIspeed > BL0942_SPI_MAX_SPEED)
+  {
+    _SPIspeed = BL0942_SPI_MAX_SPEED;
+  }
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 }
 
