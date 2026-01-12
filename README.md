@@ -146,9 +146,9 @@ Indicative figures (in microseconds per call)
 
 |  SPI  |  Function     |  UNO R3  |  ESP32  |  RP2040  |
 |:-----:|:-------------:|:--------:|:-------:|:--------:|
-|   HW  |  Calibrate    |    4     |         |          |
+|   HW  |  Calibrate    |     4    |         |          |
 |   HW  |  RW register  |   116    |         |          |
-|   SW  |  Calibrate    |    4     |         |          |
+|   SW  |  Calibrate    |     4    |         |          |
 |   SW  |  RW register  |   924    |         |          |
 
 
@@ -292,7 +292,7 @@ and will not be accounted for as Power and Energy.
 ### Fast RMS threshold
 
 - **float getFastRMSThreshold()**
-- **void setFastRMSThreshold(float threshold)**  TODO
+- **void setFastRMSThreshold(float threshold)**
 
 
 ### Fast RMS cycles
@@ -428,9 +428,11 @@ Has no effect on software SPI.
 - **uint32_t getSPIspeed()** returns SPI transfer rate.
 - **bool usesHWSPI()** returns true / false depending on constructor.
 
-_3.1.3 Fault Tolerant Mechanism of SPI Interface
+_3.1.3 Fault Tolerant Mechanism of SPI Interface_
 If MCU send 6 bytes (0xFF), the BL0942 perform a reset function 
-on the SPI communication interface. => **resetSPI()** (not implemented)_
+on the SPI communication interface.
+This might also affect configuration - to be verified!
+- **void resetSPI()** not tested.
 
 
 ### Error
@@ -460,20 +462,19 @@ To set the channel selector call back function.
 #### Must
 
 - improve documentation
-  - fix / fill TODO's
+  - elaborate all functions.
 - get API functional complete
-  - fix TODO's in code
-  - verify proper working of all functions (configuration ones)
+- verify proper working of all functions (including configuration ones)
 - get hardware to test
-- test software SPI communication.
 
 #### Should
 
 - **resetSPI()** function?  section 3.1.3
 - software SPI force under SPI max speed 
   - depending on performance / hard delayMicroseconds() for now.
+    (it could measure time for first call and switch on/off delay)
+    (#ifdef FCPU ... ?)
   - make it configurable? 
-- performance measurements
 
 #### Could
 
@@ -481,8 +482,10 @@ To set the channel selector call back function.
 - improve error handling
 - investigate unit tests
 - default parameters for simple reset?
+- performance measurements
 
 #### Wont
+- mA interface? float can easily be converted (also other units).
 
 
 ## Support

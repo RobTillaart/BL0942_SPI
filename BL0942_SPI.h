@@ -225,6 +225,10 @@ public:
   void     setSPIspeed(uint32_t speed);
   uint32_t getSPIspeed();
   bool     usesHWSPI();
+  //  datasheet 3.1.3 - to be tested.
+  //  use with care as it resets configuration
+  void     resetSPI();
+
 
   //       ERROR
   int      getLastError();
@@ -244,7 +248,6 @@ private:
   int      _error;
 
   //  (semi) constants to set in calibrate() et al..
-  float    _internVolts   = 1.218;
   float    _powerLSB      = 1.0;
   float    _voltageLSB    = 1.0;
   float    _currentLSB    = 1.0;
