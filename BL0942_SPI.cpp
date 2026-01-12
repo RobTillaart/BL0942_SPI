@@ -472,7 +472,7 @@ bool BL0942_SPI::usesHWSPI()
 }
 
 
-void BL0942::resetSPI()
+void BL0942_SPI::resetSPI()
 {
   if (_hwSPI)  //  Hardware SPI
   {
