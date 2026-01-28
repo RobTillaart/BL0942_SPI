@@ -248,7 +248,7 @@ float BL0942_SPI::getWatt()
   Serial.println(raw, HEX);
   raw &= 0xFFFFFF;
   //  extend sign bit
-  if (raw & 0x00800000) raw |= 0xFF00000;
+  if (raw & 0x00800000) raw |= 0xFF000000;
   return raw * _powerLSB;
 }
 
