@@ -3,7 +3,7 @@
 //    FILE: BL0942_SPI.h
 //  AUTHOR: Rob Tillaart
 //    DATE: 2025-12-29
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 // PURPOSE: Arduino library for BL0942 energy monitor, SPI interface.
 //     URL: https://github.com/RobTillaart/BL0942_SPI
 //
@@ -25,7 +25,7 @@
 #endif
 
 
-#define BL0942_SPI_LIB_VERSION         (F("0.1.1"))
+#define BL0942_SPI_LIB_VERSION         (F("0.1.2"))
 
 #ifndef __SPI_CLASS__
   //  MBED must be tested before RP2040

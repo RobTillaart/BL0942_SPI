@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.1.2] - 2026-01-28
+- fix negative values getWatt(), getVWave() and getIWave().
+
+
+
+
+
 ## [0.1.1] - 2026-01-06
 - fix setUserMode() to force bit 0 and 1 to b1
 - add bit masks to getters and setters to get only valid bits.

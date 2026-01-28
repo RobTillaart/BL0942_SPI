@@ -2,7 +2,7 @@
 //    FILE: BL0942_SPI.cpp
 //  AUTHOR: Rob Tillaart
 //    DATE: 2025-12-29
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 // PURPOSE: Arduino library for BL0942 energy monitor, SPI interface.
 //     URL: https://github.com/RobTillaart/BL0942_SPI
 
@@ -192,7 +192,7 @@ float BL0942_SPI::getIWave()
   int32_t raw = readRegister(BL0942_REG_I_WAVE);
   raw &= 0xFFFFF;
   //  extend sign bit
-  if (raw & 0x00080000) raw |= 0xFFF0000;
+  if (raw & 0x00080000) raw |= 0xFFF00000;
   return raw * _currentLSB;
 }
 
@@ -202,7 +202,7 @@ float BL0942_SPI::getVWave()
   int32_t raw = readRegister(BL0942_REG_V_WAVE);
   raw &= 0xFFFFF;
   //  extend sign bit
-  if (raw & 0x00080000) raw |= 0xFFF0000;
+  if (raw & 0x00080000) raw |= 0xFFF00000;
   return raw * _voltageLSB;
 }
 
