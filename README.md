@@ -49,6 +49,11 @@ The library is still under test / development with hardware, so use with care.
 
 Feedback as always is welcome. Please open an issue on GitHub.
 
+### Breaking change 0.1.2
+
+0.1.2 fixes signed values in three functions. 
+Pre 0.1.2 releases are therefore obsolete.
+
 
 ### Hardware 2 models
 

@@ -14,12 +14,12 @@
 //
 //      NAME                                NUMBER       BITS    RW
 //-------------------------------------------------------------------
-#define BL0942_REG_I_WAVE                   0x01      //  20     RO
-#define BL0942_REG_V_WAVE                   0x02      //  20     RO
+#define BL0942_REG_I_WAVE                   0x01      //  20s    RO
+#define BL0942_REG_V_WAVE                   0x02      //  20s    RO
 #define BL0942_REG_I_RMS                    0x03      //  24     RO
 #define BL0942_REG_V_RMS                    0x04      //  24     RO
 #define BL0942_REG_I_FAST_RMS               0x05      //  24     RO
-#define BL0942_REG_WATT                     0x06      //  24     RO
+#define BL0942_REG_WATT                     0x06      //  24s    RO
 #define BL0942_REG_CF_CNT                   0x07      //  24     RO
 #define BL0942_REG_FREQ                     0x08      //  16     RO
 #define BL0942_REG_STATUS                   0x09      //  10     RO
@@ -190,6 +190,8 @@ float BL0942_SPI::getIWave()
 {
   //  signed 20 bit
   int32_t raw = readRegister(BL0942_REG_I_WAVE);
+  Serial.print(__FUNCTION__);
+  Serial.println(raw, HEX);
   raw &= 0xFFFFF;
   //  extend sign bit
   if (raw & 0x00080000) raw |= 0xFFF00000;
@@ -200,6 +202,8 @@ float BL0942_SPI::getVWave()
 {
   //  signed 20 bit
   int32_t raw = readRegister(BL0942_REG_V_WAVE);
+  Serial.print(__FUNCTION__);
+  Serial.println(raw, HEX);
   raw &= 0xFFFFF;
   //  extend sign bit
   if (raw & 0x00080000) raw |= 0xFFF00000;
@@ -210,6 +214,8 @@ float BL0942_SPI::getIRMS()
 {
   //  unsigned 24 bit
   uint32_t raw = readRegister(BL0942_REG_I_RMS);
+  Serial.print(__FUNCTION__);
+  Serial.println(raw, HEX);
   raw &= 0xFFFFFF;
   return raw * _currentLSB;
 }
@@ -218,6 +224,8 @@ float BL0942_SPI::getVRMS()
 {
   //  unsigned 24 bit
   uint32_t raw = readRegister(BL0942_REG_V_RMS);
+  Serial.print(__FUNCTION__);
+  Serial.println(raw, HEX);
   raw &= 0xFFFFFF;
   return raw * _voltageLSB;
 }
@@ -226,6 +234,8 @@ float BL0942_SPI::getIRMSFast()
 {
   //  unsigned 24 bit
   uint32_t raw = readRegister(BL0942_REG_I_FAST_RMS);
+  Serial.print(__FUNCTION__);
+  Serial.println(raw, HEX);
   raw &= 0xFFFFFF;
   return raw * _currentLSB;
 }
@@ -234,6 +244,8 @@ float BL0942_SPI::getWatt()
 {
   //  signed 24 bit
   int32_t raw = readRegister(BL0942_REG_WATT);
+  Serial.print(__FUNCTION__);
+  Serial.println(raw, HEX);
   raw &= 0xFFFFFF;
   //  extend sign bit
   if (raw & 0x00800000) raw |= 0xFF00000;
