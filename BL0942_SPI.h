@@ -140,7 +140,7 @@ public:
   void     setPowerLSB(float powerLSB);
   float    getEnergyLSB();
   void     setEnergyLSB(float energyLSB);
-  //  GET MAXIMA 
+  //  GET MAXIMA
   //  derived from calibration data.
   float    getMaxCurrent();
   float    getMaxVoltage();
@@ -263,7 +263,7 @@ private:
 
 
   bool     _hwSPI;
-  uint32_t _SPIspeed = 800000;
+  uint32_t _SPIspeed = 100000;
   __SPI_CLASS__ * _mySPI;
   SPISettings   _spi_settings;
 

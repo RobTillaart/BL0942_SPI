@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update calibration examples to include **getMax...()**
 - add **uint32_t errorCount()** to count readRegister CRC errors. (debug).
 - update readme.md
-
+- minor edits
 
 
 ## [0.1.1] - 2026-01-06

@@ -352,7 +352,7 @@ void BL0942_SPI::setPowerCreep(float watt)
 {
   //  unsigned 8 bits
   uint32_t raw = watt * (256.0 / 3125.0);
-  //  watt = [0.0 - 3112.79]
+  //  watt = [0.0 - 3112.79] => [0 - 255]
   if (raw > 255) raw = 255;
   writeRegister(BL0942_REG_WA_CREEP, raw);
 }
@@ -504,7 +504,7 @@ void BL0942_SPI::setSPIspeed(uint32_t speed)
   {
     _SPIspeed = BL0942_SPI_MAX_SPEED;
   }
-  //  datasheet 3.1 
+  //  datasheet 3.1
   //  CPOL=0, CPHA=1 => SPI_MODE1
   _spi_settings = SPISettings(_SPIspeed, MSBFIRST, SPI_MODE1);
 }
@@ -519,9 +519,9 @@ bool BL0942_SPI::usesHWSPI()
   return _hwSPI;
 }
 
-
 void BL0942_SPI::resetSPI()
 {
+  //  datasheet 3.1.3
   if (_hwSPI)  //  Hardware SPI
   {
     _mySPI->beginTransaction(_spi_settings);
