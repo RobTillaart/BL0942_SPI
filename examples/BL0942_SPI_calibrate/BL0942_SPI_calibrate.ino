@@ -7,7 +7,7 @@
 
 
 #include "BL0942_SPI.h"
-#include "printHelpers.h"  //  
+#include "printHelpers.h"  //
 
 BL0942_SPI mySensor(4, 5, 6, 7);
 

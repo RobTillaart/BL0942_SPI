@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - fix negative values getWatt(), getVWave(), getIWave().
 - add **float getMaxCurrent()** **float getMaxCurrentRMS()**
 - add **float getMaxVoltage()** **float getMaxVoltageRMS()**
-
+- update calibration examples to include **getMax...()**
+- update readme.md
 
 
 
