@@ -239,7 +239,7 @@ public:
 
   //       ERROR
   int      getLastError();
-
+  uint32_t errorCount() { return _errorCount; };
 
   //  should be protected
   //  for now available for testing
@@ -253,6 +253,7 @@ private:
   uint8_t  _select;
   uint8_t  _clock;
   int      _error;
+  uint32_t _errorCount = 0;
 
   //  (semi) constants to set in calibrate() et al..
   float    _powerLSB      = 1.0;

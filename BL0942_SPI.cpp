@@ -107,7 +107,7 @@ bool BL0942_SPI::begin()
     pinMode(_dataOut, OUTPUT);
     pinMode(_clock,   OUTPUT);
     digitalWrite(_dataOut, LOW);
-    digitalWrite(_clock,   LOW);
+    digitalWrite(_clock,   LOW);  //  datasheet 3.1.1
   }
 
   //  reset variables
@@ -657,6 +657,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     if (crc != (checkSum ^ 0xFF))
     {
       _error = BL0942_ERR_CHECKSUM;
+      _errorCount++;
     }
     select(false);
     _mySPI->endTransaction();
@@ -678,6 +679,7 @@ uint32_t BL0942_SPI::readRegister(uint8_t regAddr)
     if (crc != (checkSum ^ 0xFF))
     {
       _error = BL0942_ERR_CHECKSUM;
+      _errorCount++;
     }
     select(false);
   }

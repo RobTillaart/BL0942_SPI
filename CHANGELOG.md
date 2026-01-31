@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - add **float getMaxCurrent()** **float getMaxCurrentRMS()**
 - add **float getMaxVoltage()** **float getMaxVoltageRMS()**
 - update calibration examples to include **getMax...()**
+- add **uint32_t errorCount()** to count readRegister CRC errors. (debug).
 - update readme.md
 
 
