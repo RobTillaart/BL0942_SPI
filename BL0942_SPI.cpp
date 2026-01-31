@@ -47,7 +47,7 @@
 //  extracted from app note (Chinese)
 //  + page 17 datasheet
 //  these constants have the factor 1000 for mV and mA in it.
-const float BL0942_VREF          = 1.218;
+const float BL0942_VREF          = 1.218f;
 const float BL0942_MAGIC_CURRENT = 305978000;
 const float BL0942_MAGIC_VOLT    = 73989000;
 const float BL0942_MAGIC_POWER   = 3537000000;
@@ -117,12 +117,13 @@ bool BL0942_SPI::begin()
 
 //////////////////////////////////////////////////////
 //
-//  CALIBRATION
+//  CALIBRATION 1
 //
 void BL0942_SPI::calibrate(float shunt, float reductionFactor)
 {
   //  based upon APPNOTE (Chinese) page 4
   _voltageLSB = BL0942_VREF * reductionFactor / BL0942_MAGIC_VOLT;
+  //  _voltageLSB = reductionFactor * (BL0942_VREF / BL0942_MAGIC_VOLT);
 
   _currentLSB = BL0942_VREF / (BL0942_MAGIC_CURRENT * shunt);
 
@@ -130,13 +131,39 @@ void BL0942_SPI::calibrate(float shunt, float reductionFactor)
   //  _powerLSB   = _voltageLSB * _currentLSB * 6.3995208E+06;
 
   //  reference APP NOTE formula
-  _powerLSB   = BL0942_VREF * BL0942_VREF * reductionFactor;
+  _powerLSB   = (BL0942_VREF * BL0942_VREF) * reductionFactor;
   _powerLSB  /= (BL0942_MAGIC_POWER * shunt);
 
   //  optimized formula
-  _energyLSB  = ((1638.4 * 256) / 3600000) * _powerLSB;
+  _energyLSB  = ((1638.4f * 256) / 3600000) * _powerLSB;
 }
 
+//  datasheet page 6.
+float BL0942_SPI::getMaxCurrent()
+{
+  return _currentLSB * ((0.042f * BL0942_MAGIC_CURRENT) / BL0942_VREF);
+}
+
+float BL0942_SPI::getMaxVoltage()
+{
+  return _voltageLSB * ((0.100f * BL0942_MAGIC_VOLT) / BL0942_VREF);
+}
+
+float BL0942_SPI::getMaxCurrentRMS()
+{
+  return _currentLSB * ((0.030f * BL0942_MAGIC_CURRENT) / BL0942_VREF);
+}
+
+float BL0942_SPI::getMaxVoltageRMS()
+{
+  return _voltageLSB * ((0.070f * BL0942_MAGIC_VOLT) / BL0942_VREF);
+}
+
+
+//////////////////////////////////////////////////////
+//
+//  CALIBRATION 2
+//
 float BL0942_SPI::getVoltageLSB()
 {
   return _voltageLSB;

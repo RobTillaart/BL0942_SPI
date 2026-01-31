@@ -30,7 +30,7 @@ to be used in the Open KNX environment.
 Andreas co-developed and did the testing with hardware 
 
 This library only implements and supports the SPI interface.
-To use the SPI interface, the SEL (protocol select) pin of the PL0942 
+To use the SPI interface, the SEL (protocol select) pin of the BL0942 
 must be connected to HIGH (3.3V).
 
 The device acts as a SPI slave, which works in half duplex mode,
@@ -48,6 +48,7 @@ Always read the datasheet for the details.
 The library is still under test / development with hardware, so use with care.
 
 Feedback as always is welcome. Please open an issue on GitHub.
+
 
 ### Breaking change 0.1.2
 
@@ -230,6 +231,13 @@ Reduction factor of an ```VDD - R1 - R2 - GND``` ladder:
 ```
 RF = (R1 + R2) / R2;  // e.g. R1=200K R2=100 => RF=200100/100 = 2001.
 ```
+
+From the calibration data the maxima can be derived.
+
+- **float getMaxCurrent()** idem
+- **float getMaxVoltage()** idem
+- **float getMaxCurrentRMS()** idem
+- **float getMaxVoltageRMS()** idem
 
 
 ### Calibration 2

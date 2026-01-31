@@ -140,6 +140,13 @@ public:
   void     setPowerLSB(float powerLSB);
   float    getEnergyLSB();
   void     setEnergyLSB(float energyLSB);
+  //  GET MAXIMA 
+  //  derived from calibration data.
+  float    getMaxCurrent();
+  float    getMaxVoltage();
+  float    getMaxCurrentRMS();
+  float    getMaxVoltageRMS();
+
 
   //  READ ONLY registers
   float    getIWave();

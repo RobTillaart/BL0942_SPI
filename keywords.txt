@@ -8,6 +8,12 @@ BL0942_SPI	KEYWORD1
 begin	KEYWORD2
 
 calibrate	KEYWORD2
+
+getMaxCurrent	KEYWORD2
+getMaxVoltage	KEYWORD2
+getMaxCurrentRMS	KEYWORD2
+getMaxVoltageRMS	KEYWORD2
+
 getVoltageLSB	KEYWORD2
 setVoltageLSB	KEYWORD2
 getCurrentLSB	KEYWORD2
