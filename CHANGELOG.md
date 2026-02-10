@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - update readme.md
 - minor edits
 
-
 ## [0.1.1] - 2026-01-06
 - fix setUserMode() to force bit 0 and 1 to b1
 - add bit masks to getters and setters to get only valid bits.

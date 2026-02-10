@@ -31,7 +31,7 @@ Andreas co-developed and did the testing with hardware
 
 This library only implements and supports the SPI interface.
 To use the SPI interface, the SEL (protocol select) pin of the BL0942 
-must be connected to HIGH (3.3V).
+must be connected to HIGH (3.3 Volt).
 
 The device acts as a SPI slave, which works in half duplex mode,
 at a maximum clock rate of 900 kHz. This is a rather low speed and
@@ -229,7 +229,7 @@ loads. **So, the maximum rated current@ (1mΩ shunt) should be limited to 16A.**
 
 Reduction factor of an ```VDD - R1 - R2 - GND``` ladder:
 ```
-RF = (R1 + R2) / R2;  // e.g. R1=200K R2=100 => RF=200100/100 = 2001.
+RF = (R1 + R2) / R2;  // e.g. R1 = 200K R2 = 100 ==> RF = 200100 / 100 = 2001.
 ```
 
 From the calibration data the maxima can be derived.
@@ -272,7 +272,7 @@ Register 0x01-0x08.
 - **float getWatt()** returns power in Watt.
 - **uint32_t getCFPulseCount()** returns counter (base for energy).
 - **float getEnergy()** returns energy in kWh.
-- **float getFrequency()** returns frequency ~50/60 Hz.
+- **float getFrequency()** returns frequency typical ~50 or ~60 Hz.
 
 
 ### Status

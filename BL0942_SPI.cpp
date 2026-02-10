@@ -124,16 +124,18 @@ void BL0942_SPI::calibrate(float shunt, float reductionFactor)
 {
   //  based upon APPNOTE (Chinese) page 4
   _voltageLSB = BL0942_VREF * reductionFactor / BL0942_MAGIC_VOLT;
+  //  optimized formula
   //  _voltageLSB = reductionFactor * (BL0942_VREF / BL0942_MAGIC_VOLT);
 
   _currentLSB = BL0942_VREF / (BL0942_MAGIC_CURRENT * shunt);
-
   //  optimized formula
-  //  _powerLSB   = _voltageLSB * _currentLSB * 6.3995208E+06;
+  // _currentLSB = (BL0942_VREF / BL0942_MAGIC_CURRENT) / shunt;
 
   //  reference APP NOTE formula
   _powerLSB   = (BL0942_VREF * BL0942_VREF) * reductionFactor;
   _powerLSB  /= (BL0942_MAGIC_POWER * shunt);
+  //  optimized formula
+  //  _powerLSB   = _voltageLSB * _currentLSB * 6.3995208E+06;
 
   //  optimized formula
   _energyLSB  = ((1638.4f * 256) / 3600000) * _powerLSB;
@@ -344,7 +346,7 @@ float BL0942_SPI::getPowerCreep()
   //  unsigned 8 bits
   uint32_t raw = readRegister(BL0942_REG_WA_CREEP);
   raw &= 0xFF;
-  float watt = raw * (3125.0/256.0);
+  float watt = raw * (3125.0 / 256.0);
   return watt;
 }
 
@@ -695,6 +697,7 @@ uint8_t BL0942_SPI::swSPI_transfer(uint8_t val)
   uint8_t dao = _dataOut;
   uint8_t dai = _dataIn;
   uint8_t value = 0;
+  //  SPI MODE 1 - MSB FIRST
   for (uint8_t mask = 0x80; mask; mask >>= 1)
   {
     digitalWrite(dao,(val & mask));
@@ -705,7 +708,7 @@ uint8_t BL0942_SPI::swSPI_transfer(uint8_t val)
       value |= mask;
     }
     //  force below 900.000 Hz rate (hard coded for now).
-    delayMicroseconds(1);
+    delayMicroseconds(5);
   }
   return value;
 }
